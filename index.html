@@ -1047,6 +1047,9 @@ function isOnTrack(dist){return dist<=currentTrack.trackWidth/2;}
 
 function updatePlayer(k,dt){
   if(k.stunTime>0){
+    // Décrémenter aussi starTime/boostTime pendant le stun pour ne pas les figer
+    if(k.boostTime>0)k.boostTime-=dt;
+    if(k.starTime>0){k.starTime-=dt;if(k.starTime<=0&&k.isPlayer)document.getElementById('star-fx').classList.remove('active');}
     k.stunTime-=dt;
     if(k.stunTime<=0){
       // Réalignement automatique dans le bon sens à la fin du déraper
@@ -1124,7 +1127,7 @@ function pickRandom(arr){return arr[Math.floor(Math.random()*arr.length)];}
 // Ramassage des boîtes par les karts
 function checkPickups(){
   for(const k of game.karts){
-    if(k.item||k.stunTime>0)continue;
+    if(k.item||k.stunTime>0||k.finished)continue;
     for(const box of game.itemBoxes){
       if(!box.active)continue;
       if(Math.hypot(k.x-box.x,k.y-box.y)<18){
@@ -1304,11 +1307,11 @@ let notifTimer=0;
 
 function formatTime(ms){const m=Math.floor(ms/60000),s=Math.floor((ms%60000)/1000),cs=Math.floor((ms%1000)/10);return m+":"+String(s).padStart(2,'0')+"."+String(cs).padStart(2,'0');}
 function ordinal(n){return T('ordinals')[Math.min(n-1,3)]||n;}
-function computePlace(target){let place=1;const tp=target.finished?(currentTrack.totalLaps+10-target.finishTime/1e9):(target.laps+target.u);for(const k of game.karts){if(k===target)continue;const kp=k.finished?(currentTrack.totalLaps+10-k.finishTime/1e9):(k.laps+k.u);if(kp>tp)place++;}return place;}
+function computePlace(target){let place=1;const tp=target.finished?(1e9-target.finishTime):(target.laps+target.u)*1000;for(const k of game.karts){if(k===target)continue;const kp=k.finished?(1e9-k.finishTime):(k.laps+k.u)*1000;if(kp>tp)place++;}return place;}
 
 function drawHUD(){
   const p=game.player;
-  hLap.textContent=T('lap_label')+" "+clamp(p.laps+1,1,currentTrack.totalLaps)+"/"+currentTrack.totalLaps;
+  hLap.textContent=T('lap_label')+" "+(p.finished?currentTrack.totalLaps:clamp(p.laps+1,1,currentTrack.totalLaps))+"/"+currentTrack.totalLaps;
   hTime.textContent=formatTime(game.raceTime);
   hSpeed.textContent=Math.round((p.speed/p.char.stats.topSpeed)*180)+" km/h";
   hPos.textContent=ordinal(computePlace(p));
@@ -1470,7 +1473,7 @@ function goToTrackSelect(){
 function showResult(){
   game.state=STATE.RESULT;
   AUDIO.silenceEngine();
-  menuMusicPlay();
+  setTimeout(menuMusicPlay,400); // laisser le moteur se taire avant la musique
   hudEl.classList.remove('active');bridgeHudEl.classList.remove('active');wrongWayEl.classList.remove('active');document.getElementById('star-fx').classList.remove('active');
   document.getElementById('touch-controls').classList.remove('active');
   const ranking=[...game.karts].sort((a,b)=>{const ap=a.finished?(1e9-a.finishTime):(a.laps+a.u),bp=b.finished?(1e9-b.finishTime):(b.laps+b.u);return bp-ap;});
