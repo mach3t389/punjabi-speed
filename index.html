@@ -1447,6 +1447,17 @@ const _mm=()=>document.getElementById('menu-music');
 function menuMusicPlay(){const m=_mm();if(!m||m._playing)return;m.volume=0.55;m.currentTime=m.currentTime||0;m.play().catch(()=>{});m._playing=true;}
 function menuMusicStop(){const m=_mm();if(!m)return;m.pause();m._playing=false;}
 
+document.addEventListener('visibilitychange',()=>{
+  const m=_mm();if(!m)return;
+  if(document.hidden){
+    if(m._playing){m.pause();m._wasPlaying=true;}
+    AUDIO.silenceEngine();
+  } else {
+    if(m._wasPlaying){m.play().catch(()=>{});m._wasPlaying=false;}
+    if(game.state===STATE.RACING&&!game.paused)AUDIO.resumeEngine?.();
+  }
+});
+
 function goToSelect(){
   AUDIO.init();AUDIO.resume();menuMusicPlay();
   _selectingP=1;selectedChar=-1;selectedCharP2=-1;
