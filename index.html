@@ -139,6 +139,10 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; font-fam
 /* ---- Boutons de titre ---- */
 .title-nav{margin-top:26px;display:flex;flex-direction:column;align-items:stretch;gap:12px;width:clamp(260px,44vw,360px);}
 .title-nav-secondary{display:flex;gap:10px;}
+.player-select-row{display:flex;gap:8px;}
+.player-btn{flex:1;padding:10px 6px;font-family:"Press Start 2P","Courier New",monospace;font-size:clamp(9px,1.6vw,13px);letter-spacing:1px;background:rgba(255,255,255,0.07);color:#aac8e8;border:2px solid rgba(100,160,220,0.3);border-radius:12px;cursor:pointer;transition:.12s;}
+.player-btn:hover{background:rgba(255,255,255,0.14);border-color:rgba(100,160,220,0.7);}
+.player-btn.active{background:rgba(244,208,63,0.18);color:#F4D03F;border-color:#F4D03F;text-shadow:0 0 8px rgba(244,208,63,.5);}
 .nav-btn{flex:1;padding:9px 10px;font-family:inherit;font-size:clamp(11px,1.9vw,14px);font-weight:bold;letter-spacing:1px;color:#fff;background:rgba(255,255,255,.10);border:2px solid rgba(255,255,255,.28);border-radius:24px;cursor:pointer;transition:.12s;text-align:center;}
 .nav-btn:hover{border-color:#F4D03F;background:rgba(244,208,63,.18);}
 .nav-play{flex:none;width:100%;padding:14px 10px;font-size:clamp(16px,3.2vw,24px);letter-spacing:3px;color:#062;background:#F4D03F;border:none;border-radius:32px;box-shadow:0 6px 0 #b9952a;transition:.12s;}
@@ -178,6 +182,10 @@ input[type=range].pk-slider::-moz-range-thumb{width:20px;height:20px;border-radi
     <div class="title-tagline">MOREL &times; NAGPAL RACING</div>
     <div class="subtitle">HOCHELAGA · KITCHENER · ÎLE NOTRE-DAME</div>
     <div class="title-nav">
+      <div class="player-select-row" id="player-select-row">
+        <button class="player-btn active" id="btn-1p-title" data-players="1">👤 1 JOUEUR</button>
+        <button class="player-btn" id="btn-2p-title" data-players="2">👥 2 JOUEURS</button>
+      </div>
       <button class="nav-btn nav-play" id="title-play" data-i18n="press_play">▶ JOUER</button>
       <div class="title-nav-secondary">
         <button class="nav-btn" id="title-stats" data-i18n="stats_btn">📊 STATISTIQUES</button>
@@ -1649,6 +1657,17 @@ function pauseToMenu(){
 function init(){
   setupTrack(TRACKS[0]);
   document.getElementById('title-play').addEventListener('click',()=>{if(game.state===STATE.TITLE){AUDIO.init();AUDIO.resume();goToSelect();}});
+  document.querySelectorAll('.player-btn').forEach(b=>{
+    b.addEventListener('click',()=>{
+      const n=+b.dataset.players;
+      game.splitScreen=(n===2);
+      document.querySelectorAll('.player-btn').forEach(x=>x.classList.toggle('active',x===b));
+      // Sync le bouton 2P du sélecteur de piste
+      const btn2p=document.getElementById('btn-2p');
+      if(btn2p){btn2p.textContent='👥 '+(game.splitScreen?'2P':'1P');btn2p.style.borderColor=game.splitScreen?'rgba(255,150,255,.9)':'rgba(255,150,255,.4)';}
+      AUDIO.init();AUDIO.resume();AUDIO.beep(n===2?800:600,.06,.10);
+    });
+  });
   document.getElementById('start-sel-btn').addEventListener('click',()=>{AUDIO.init();AUDIO.resume();goToTrackSelect();});
   document.getElementById('start-race-btn').addEventListener('click',()=>{AUDIO.init();AUDIO.resume();startRace();});
   document.getElementById('r-replay').addEventListener('click',()=>startRace());
