@@ -116,6 +116,9 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; font-fam
 #top-bar button:hover{background:rgba(244,208,63,.25);border-color:#F4D03F;}
 #home-btn{display:none;}
 
+/* ---- Bouton menu en jeu ---- */
+#ingame-menu-btn{display:none;position:absolute;top:8px;left:8px;z-index:15;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.3);border-radius:20px;color:#fff;font-size:16px;padding:3px 10px;cursor:pointer;font-family:inherit;}
+#ingame-menu-btn:hover{background:rgba(244,208,63,.3);border-color:#F4D03F;}
 /* ---- PAUSE ---- */
 #screen-pause{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.78);z-index:20;}
 #screen-pause.active{display:flex;}
@@ -282,6 +285,8 @@ input[type=range].pk-slider::-moz-range-thumb{width:20px;height:20px;border-radi
     <button class="go-btn" id="stats-back" style="margin-top:22px" data-i18n="back">◀ RETOUR</button>
     <button class="stats-reset" id="stats-reset" data-i18n="stats_reset">Réinitialiser les statistiques</button>
   </div>
+
+  <button id="ingame-menu-btn" onclick="togglePause()">⌂</button>
 
   <div id="hud">
     <div class="seg" id="h-lap">LAP 1/3</div>
@@ -1319,6 +1324,7 @@ function showScreen(id){
   const onTitle=(game.state===STATE.TITLE);
   document.getElementById('lang-btn').style.display=inGame?'none':'';
   document.getElementById('home-btn').style.display=(inGame||onTitle)?'none':'inline-block';
+  document.getElementById('ingame-menu-btn').style.display=inGame?'block':'none';
 }
 
 let selectedChar=-1,selectedCharP2=-1,_selectingP=1; // quel joueur choisit (1 ou 2)
