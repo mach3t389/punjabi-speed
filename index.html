@@ -922,17 +922,20 @@ let _vpY0=0,_vpH=RENDER_H;
 
 function renderMode7(camX,camY,camAngle){
   const vpY0=_vpY0,vpH=_vpH;
-  const VHORIZ=Math.round(vpH*CAMERA.horizon),absHoriz=vpY0+VHORIZ;
+  // Horizon relatif à ce viewport : proportion identique à HORIZ_Y/RENDER_H
+  const VHORIZ=Math.round(vpH*CAMERA.horizon);
+  const absHoriz=vpY0+VHORIZ;
   const cosA=Math.cos(camAngle),sinA=Math.sin(camAngle),rx=-sinA,ry=cosA;
-  // Ciel — sample skyRow proportionnellement
+  // Ciel : on pigge dans skyRow en clampant sur son domaine (HORIZ_Y entrées)
   for(let y=vpY0;y<absHoriz;y++){
-    const i=Math.min(Math.round((y-vpY0)/(VHORIZ||1)*(HORIZ_Y-1)),HORIZ_Y-1);
-    const c=skyRow[i],off=y*RENDER_W;for(let x=0;x<RENDER_W;x++)buf32[off+x]=c;
+    const si=Math.min(((y-vpY0)*HORIZ_Y/VHORIZ)|0,HORIZ_Y-1);
+    const c=skyRow[si],off=y*RENDER_W;
+    for(let x=0;x<RENDER_W;x++)buf32[off+x]=c;
   }
-  // Sol
+  // Sol (Mode 7)
   const step=PERF.lowRes?2:1;
   for(let y=absHoriz;y<vpY0+vpH;y+=step){
-    const p=y-absHoriz+1,f=dynamicFocalH/p,cx2=camX+cosA*f,cy2=camY+sinA*f;
+    const row=y-absHoriz+1,f=dynamicFocalH/row,cx2=camX+cosA*f,cy2=camY+sinA*f;
     const halfSpan=f*HALF_W/CAMERA.fovScale;
     let wx=(cx2-rx*halfSpan)*TEX_SCALE,wy=(cy2-ry*halfSpan)*TEX_SCALE;
     const stepX=(rx*halfSpan*2*TEX_SCALE)/RENDER_W,stepY=(ry*halfSpan*2*TEX_SCALE)/RENDER_W,off=y*RENDER_W;
