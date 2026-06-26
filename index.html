@@ -513,37 +513,41 @@ function drawPixelIcon(canvasEl,type){
 const TRACKS=[
   {
     id:0, name:"HOCHELAGA", subtitle:"Montréal, Québec", previewColor:"#E24B4A",
-    desc:"Circuit urbain · Grande droite · Épingle serrée",
-    descEn:"Urban circuit · Long straight · Tight hairpin",
-    // Grande droite S/F au sud (550u), épingle serrée à l'ouest,
-    // chicane technique au nord, retour courbe à l'est
+    desc:"Grande droite · Épingle · Chicane en S",
+    descEn:"Long straight · Hairpin · S-chicane",
+    // 11 pts — grande droite S/F (690u), épingle serrée à l'ouest,
+    // traversée haute avec S (gauche+droite), retour est avec courbes.
+    // Sens: anti-horaire → virages D à l'épingle + E est ; virages G au S chicane
     controlPoints:[
-      {x:730, y:840}, // 0 - START/FINISH (droite, cap ouest)
-      {x:180, y:840}, // 1 - Bout ouest de la grande droite
-      {x: 70, y:710}, // 2 - Entrée épingle
-      {x: 60, y:500}, // 3 - Apex épingle (virage serré gauche)
-      {x:180, y:320}, // 4 - Sortie épingle, montée vers le nord
-      {x:420, y:220}, // 5 - Chicane apex 1 (gauche)
-      {x:640, y:260}, // 6 - Chicane apex 2 (droite)
-      {x:810, y:430}, // 7 - Grand virage nord-est
-      {x:820, y:650}, // 8 - Côté est, retour sud
+      {x:850, y:900}, // 0  - START/FINISH, bout est (cap ouest)
+      {x:160, y:890}, // 1  - Bout ouest de la grande droite (690u)
+      {x: 30, y:740}, // 2  - Entrée épingle gauche (virage droit amorcé)
+      {x: 10, y:530}, // 3  - Apex épingle (virage DROIT serré, cap nord)
+      {x:110, y:330}, // 4  - Sortie épingle, cap nord-est
+      {x:320, y:200}, // 5  - Haut gauche, cap est
+      {x:500, y:300}, // 6  - Chicane S : virage DROIT (pull sud)
+      {x:660, y:175}, // 7  - Chicane S : virage GAUCHE (pull nord)
+      {x:830, y:290}, // 8  - Grand virage DROIT cap sud-est
+      {x:900, y:520}, // 9  - Côté est, cap sud
+      {x:880, y:730}, // 10 - Retour sud-ouest vers arrivée
     ],
     trackWidth:88, totalLaps:3,
     surfaceColors:{road:"#646464",roadLight:"#c4c4c4",grass:"#2d5a27",grassDark:"#1e3d1a",curb:["#E23A30","#F2F2F2"],bridge:null,bridgeLight:null},
     elevations:[],
     decorations:[
       {type:"start_banner", t:0.004, side:0},
-      {type:"grandstand",   t:0.03,  side:-1},
-      {type:"grandstand",   t:0.08,  side:1},
-      {type:"sign",         t:0.18,  side:1,  label:"T1"},
-      {type:"tree",         t:0.30,  side:-1},
-      {type:"sign",         t:0.42,  side:1,  label:"T2"},
-      {type:"tree",         t:0.52,  side:1},
-      {type:"sign",         t:0.63,  side:-1, label:"T3"},
-      {type:"tree",         t:0.78,  side:1},
-      {type:"sign",         t:0.88,  side:-1, label:"T4"},
+      {type:"grandstand",   t:0.02,  side:-1},
+      {type:"grandstand",   t:0.07,  side:1},
+      {type:"sign",         t:0.16,  side:1,  label:"T1"},
+      {type:"tree",         t:0.27,  side:-1},
+      {type:"sign",         t:0.37,  side:-1, label:"T2"},
+      {type:"tree",         t:0.46,  side:1},
+      {type:"sign",         t:0.55,  side:1,  label:"T3"},
+      {type:"tree",         t:0.65,  side:-1},
+      {type:"sign",         t:0.75,  side:-1, label:"T4"},
+      {type:"tree",         t:0.87,  side:1},
     ],
-    itemPositions:[0.06,0.22,0.42,0.62,0.82],
+    itemPositions:[0.05,0.20,0.38,0.55,0.72,0.88],
   },
   {
     id:1, name:"KITCHENER", subtitle:"Ontario, Canada", previewColor:"#1D9E75",
