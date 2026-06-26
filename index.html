@@ -1122,7 +1122,7 @@ function checkPickups(){
         box.respawnIn=ITEM_RESPAWN;
         k.item=pickRandom(ITEM_LIST);
         AUDIO.beep(880,.08,.14);
-        if(k.isPlayer)showNotif("📦 "+ITEM_INFO[k.item].label,600);
+        if(k.isPlayer)showNotif(" "+ITEM_INFO[k.item].label,600,k.item);
       }
     }
   }
@@ -1143,14 +1143,14 @@ function useItem(k){
   if(type==='TURBO'){
     k.boostTime=180;
     AUDIO.beep(1200,.18,.18);
-    if(k.isPlayer)showNotif("⚡ TURBO!",700);
+    if(k.isPlayer)showNotif(" TURBO!",700,'TURBO');
     return;
   }
   if(type==='ETOILE'){
     k.starTime=360; // ~6 secondes à 60fps
     k.boostTime=Math.max(k.boostTime,120); // petit boost de vitesse aussi
     AUDIO.beep(1400,.05,.15);setTimeout(()=>AUDIO.beep(1600,.05,.14),80);setTimeout(()=>AUDIO.beep(1800,.05,.13),160);setTimeout(()=>AUDIO.beep(2000,.12,.18),240);
-    if(k.isPlayer){showNotif("⭐ INVINCIBLE!",900);document.getElementById('star-fx').classList.add('active');}
+    if(k.isPlayer){showNotif(" INVINCIBLE!",900,'ETOILE');document.getElementById('star-fx').classList.add('active');}
     return;
   }
   if(type==='BANANE'){
@@ -1158,14 +1158,14 @@ function useItem(k){
     const bx=k.x-Math.cos(k.angle)*28, by=k.y-Math.sin(k.angle)*28;
     game.droppedItems.push({x:bx,y:by,type:'BANANE',life:900,ownerId:k.char.id});
     AUDIO.beep(440,.12,.12);
-    if(k.isPlayer)showNotif("🍌 BANANE!",600);
+    if(k.isPlayer)showNotif(" BANANE!",600,'BANANE');
     return;
   }
   // Projectile en avant
   const px=k.x+Math.cos(k.angle)*20, py=k.y+Math.sin(k.angle)*20;
   game.projectiles.push({x:px,y:py,angle:k.angle,speed:info.speed,type,ownerId:k.char.id,life:info.life,bounceCount:type==='POULET'?4:0});
   AUDIO.beep(660,.1,.15);
-  if(k.isPlayer)showNotif(type==='FUSIL'?"🔫 FUSIL!":type==='COUTEAU'?"🔪 COUTEAU!":"🐔 POULET!",600);
+  if(k.isPlayer)showNotif(type==='FUSIL'?" FUSIL!":type==='COUTEAU'?" COUTEAU!":" POULET!",600,type);
 }
 
 // Mise à jour des projectiles
@@ -1306,8 +1306,16 @@ let lapFlashT=0;
 function showLapFlash(){lapFlashT=300;hudEl.classList.add('flash');}
 function updateLapFlash(dtMs){if(lapFlashT>0){lapFlashT-=dtMs;if(lapFlashT<=0)hudEl.classList.remove('flash');}}
 
-function showNotif(text,duration){
-  notifEl.textContent=text;
+function showNotif(text,duration,iconType){
+  notifEl.innerHTML="";
+  if(iconType&&(ITEM_INFO[iconType]||DIFF_ICONS[iconType])){
+    const cv=document.createElement('canvas');
+    cv.width=48;cv.height=48;
+    cv.style.cssText="width:.95em;height:.95em;image-rendering:pixelated;image-rendering:crisp-edges;vertical-align:middle;margin-right:.18em;";
+    drawPixelIcon(cv,iconType);
+    notifEl.appendChild(cv);
+  }
+  notifEl.appendChild(document.createTextNode(text));
   notifEl.style.display="block";
   notifEl.style.animation="none";
   void notifEl.offsetWidth;
