@@ -125,6 +125,10 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; font-fam
 
 /* ---- Boutons désactivés (rien de sélectionné) ---- */
 .go-btn:disabled{opacity:.35;cursor:not-allowed;filter:grayscale(.6);box-shadow:0 5px 0 #555;}
+.screen-nav-row{display:flex;gap:14px;margin-top:18px;}
+.screen-nav-row .go-btn{flex:1;}
+.go-back{background:rgba(255,255,255,.12);color:#ccc;box-shadow:0 5px 0 #333;}
+.go-back:active{box-shadow:0 1px 0 #333;}
 
 /* ---- Sélecteur de difficulté ---- */
 .diff-row{display:flex;gap:10px;justify-content:center;margin-top:8px;margin-bottom:12px;}
@@ -198,7 +202,10 @@ input[type=range].pk-slider::-moz-range-thumb{width:20px;height:20px;border-radi
   <div id="screen-select" class="screen">
     <div class="select-title" data-i18n="choose_pilot">CHOISIS TON PILOTE</div>
     <div class="char-row" id="char-row"></div>
-    <button class="go-btn" id="start-sel-btn" data-i18n="next">SUIVANT ▶</button>
+    <div class="screen-nav-row">
+      <button class="go-btn go-back" id="sel-back">◀ RETOUR</button>
+      <button class="go-btn" id="start-sel-btn" data-i18n="next">SUIVANT ▶</button>
+    </div>
   </div>
 
   <div id="screen-track" class="screen">
@@ -209,7 +216,10 @@ input[type=range].pk-slider::-moz-range-thumb{width:20px;height:20px;border-radi
       <button class="diff-btn" data-d="2" data-i18n="diff_hard">DIFFICILE</button>
     </div>
     <div class="track-row" id="track-row"></div>
-    <button class="go-btn" id="start-race-btn" data-i18n="go">DÉPART ▶</button>
+    <div class="screen-nav-row">
+      <button class="go-btn go-back" id="track-back">◀ RETOUR</button>
+      <button class="go-btn" id="start-race-btn" data-i18n="go">DÉPART ▶</button>
+    </div>
   </div>
 
   <div id="screen-settings" class="screen">
@@ -256,7 +266,7 @@ input[type=range].pk-slider::-moz-range-thumb{width:20px;height:20px;border-radi
   <div id="star-fx"></div>
 
   <div id="item-corner">
-    <div id="ic-box"><canvas id="ic-canvas" width="24" height="24" style="width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges;display:block;"></canvas></div>
+    <div id="ic-box"><canvas id="ic-canvas" width="32" height="32" style="width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges;display:block;"></canvas></div>
     <div id="ic-label"></div>
   </div>
 
@@ -408,21 +418,87 @@ const ITEM_INFO={
   ETOILE: {label:"ÉTOILE",  icon:"⭐", color:"#ffe566",color2:"#c8a000",projectile:false,fwd:false, speed:0,   life:0},
 };
 const ITEM_RESPAWN=600;
-// Pixel art 8×8 pour le coin item
+// Pixel art 8×8 — 4px par pixel logique = canvas 32×32
 const PIX_GRIDS={
-  FUSIL:  ['........','..GGGGG.','..G...GG','GGG....G','G......G','GGG.GGG.','........','........'],
-  COUTEAU:['......SS','.....SSS','....SSS.','...SSSL.','..SSSL..','SSSL....','SSL.....','LL......'],
-  POULET: ['.WWWW...','WWRWWW..','WWWWWW..','WWWWWW..','YYWWWW..','..YYYY..','..OO....','........'],
-  BANANE: ['..YYYYY.','..Y...Y.','YY....Y.','Y.....YY','Y.....Y.','.YYYYYY.','..YYYY..','........'],
-  TURBO:  ['...CC...','..CC....','CCCCCCC.','..CCC...','...CCC..','....CC..','....C...','........'],
-  ETOILE: ['...Y....','..YYY...','YYYYYYY.','.YYYYY..','..YYY...','..Y.Y...','..Y.Y...','........'],
+  // Pistolet (vue de côté, canon à droite)
+  FUSIL:[
+    '........',
+    '..DDDD..',
+    '.D.D..D.',
+    'DDDDD.D.',
+    'D.....D.',
+    'DDDDDD..',
+    '..DD....',
+    '........',
+  ],
+  // Couteau (lame diagonale, manche en bas-gauche)
+  COUTEAU:[
+    '......SS',
+    '.....SS.',
+    '....SS..',
+    '...SS...',
+    '..SS....',
+    '.SSHH...',
+    '.SHH....',
+    'HH......',
+  ],
+  // Poulet (vue de face, ailes ouvertes)
+  POULET:[
+    '.WRRRW..',
+    'WWWRWWW.',
+    'WWWWWWW.',
+    'WWWWWWW.',
+    '.WWWWW..',
+    '..WOWO..',
+    '..OO....',
+    '........',
+  ],
+  // Banane (forme courbée)
+  BANANE:[
+    '...YY...',
+    '..Y..Y..',
+    '.Y....Y.',
+    'Y......Y',
+    '.Y....Y.',
+    '..YYYY..',
+    '...YY...',
+    '........',
+  ],
+  // Éclair (zigzag)
+  TURBO:[
+    '...CCC..',
+    '..CCC...',
+    '.CCCCCC.',
+    '..CCCC..',
+    '.CCCCCC.',
+    '...CCC..',
+    '..CC....',
+    '........',
+  ],
+  // Étoile à 4 branches + centre
+  ETOILE:[
+    '...Y....',
+    '..YYY...',
+    '.YYYYY..',
+    'YYYYYYY.',
+    '.YYYYY..',
+    '..YYY...',
+    '...Y....',
+    '........',
+  ],
 };
-const PIX_COL={G:'#aaa',S:'#d8d8d8',L:'#8B5E3C',W:'#fff',R:'#E24B4A',Y:'#F4D03F',O:'#E67E22',C:'#00ccff'};
+const PIX_COL={D:'#b0b8c8',S:'#e8e8f0',H:'#7a5230',W:'#f0f0f0',R:'#e03030',O:'#e07820',Y:'#F4D03F',C:'#18d8ff'};
 function drawPixelIcon(canvasEl,type){
   const g=PIX_GRIDS[type];if(!g||!canvasEl)return;
-  const c=canvasEl.getContext('2d');c.clearRect(0,0,24,24);
-  const ps=3;
-  for(let r=0;r<8;r++)for(let col=0;col<8;col++){const ch=g[r][col];if(ch==='.'||!PIX_COL[ch])continue;c.fillStyle=PIX_COL[ch];c.fillRect(col*ps,r*ps,ps,ps);}
+  const c=canvasEl.getContext('2d');c.clearRect(0,0,32,32);
+  const ps=4;
+  for(let r=0;r<8;r++)for(let col=0;col<8;col++){
+    const ch=g[r][col];if(ch==='.'||!PIX_COL[ch])continue;
+    // Pixel principal
+    c.fillStyle=PIX_COL[ch];c.fillRect(col*ps,r*ps,ps,ps);
+    // Highlight sur le coin haut-gauche (effet de volume)
+    c.fillStyle='rgba(255,255,255,0.28)';c.fillRect(col*ps,r*ps,1,1);
+  }
 }
 
 /* ----- TRACKS ----- */
@@ -1699,6 +1775,15 @@ function init(){
     });
   });
   document.getElementById('start-sel-btn').addEventListener('click',()=>{AUDIO.init();AUDIO.resume();goToTrackSelect();});
+  document.getElementById('sel-back').addEventListener('click',()=>{
+    if(game.splitScreen&&_selectingP===2){_selectingP=1;selectedChar=-1;initCharSelect();AUDIO.beep(500,.05,.1);}
+    else{game.state=STATE.TITLE;menuMusicPlay();showScreen('screen-title');AUDIO.beep(500,.05,.1);}
+  });
+  document.getElementById('track-back').addEventListener('click',()=>{
+    game.state=STATE.SELECT;
+    if(game.splitScreen){_selectingP=2;selectedCharP2=-1;}else{_selectingP=1;selectedChar=-1;}
+    initCharSelect();showScreen('screen-select');AUDIO.beep(500,.05,.1);
+  });
   document.getElementById('start-race-btn').addEventListener('click',()=>{AUDIO.init();AUDIO.resume();startRace();});
   document.getElementById('r-replay').addEventListener('click',()=>startRace());
   document.getElementById('r-menu').addEventListener('click',()=>{game.state=STATE.TITLE;AUDIO.silenceEngine();menuMusicPlay();showScreen('screen-title');});
