@@ -1318,7 +1318,7 @@ function showScreen(id){
   const inGame=(game.state===STATE.RACING||game.state===STATE.COUNTDOWN||game.state===STATE.PAUSE);
   const onTitle=(game.state===STATE.TITLE);
   document.getElementById('lang-btn').style.display=inGame?'none':'';
-  document.getElementById('home-btn').style.display=(inGame||onTitle)?'none':'';
+  document.getElementById('home-btn').style.display=(inGame||onTitle)?'none':'inline-block';
 }
 
 let selectedChar=-1,selectedCharP2=-1,_selectingP=1; // quel joueur choisit (1 ou 2)
