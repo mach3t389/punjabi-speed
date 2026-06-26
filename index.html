@@ -156,6 +156,9 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; font-fam
 .diff-card-desc{font-size:clamp(8px,1.2vw,10px);color:rgba(255,255,255,.5);letter-spacing:0.5px;}
 .params-section-label{font-size:clamp(9px,1.4vw,11px);font-weight:bold;letter-spacing:3px;color:rgba(255,255,255,.45);text-align:center;margin:6px 0 2px;}
 .pad-row-focus{outline:2px solid #F4D03F;outline-offset:4px;border-radius:10px;}
+.nav-focus{outline:3px solid #fff;outline-offset:5px;border-radius:12px;box-shadow:0 0 0 6px rgba(0,200,255,.25);animation:navpulse 1s ease-in-out infinite;}
+.nav-btn-focus{outline:3px solid #fff;outline-offset:3px;filter:brightness(1.1);box-shadow:0 0 0 5px rgba(0,200,255,.3),0 0 18px rgba(0,200,255,.6);animation:navpulse 1s ease-in-out infinite;}
+@keyframes navpulse{50%{box-shadow:0 0 0 8px rgba(0,200,255,.12),0 0 22px rgba(0,200,255,.45);}}
 .lap-select-row{display:flex;align-items:center;justify-content:center;gap:12px;margin:3px 0 5px;}
 .lap-select-label{font-size:clamp(11px,1.8vw,14px);font-weight:bold;letter-spacing:2px;color:rgba(255,255,255,.7);}
 .lap-btns{display:flex;gap:8px;}
@@ -241,7 +244,7 @@ input[type=range].pk-slider::-moz-range-thumb{width:20px;height:20px;border-radi
     <div class="select-title" data-i18n="race_params">PARAMÈTRES DE COURSE</div>
 
     <div class="params-section-label" data-i18n="set_diff">DIFFICULTÉ</div>
-    <div class="diff-cards" id="diff-cards" id="pad-row-0">
+    <div class="diff-cards" id="diff-cards">
       <div class="diff-card" data-d="0">
         <div class="diff-card-icon"><canvas class="diff-icon-canvas" data-icon="LEAF" width="32" height="32"></canvas></div>
         <div class="diff-card-label" data-i18n="diff_easy">FACILE</div>
@@ -891,16 +894,17 @@ window.addEventListener('gamepadconnected',()=>{
 window.addEventListener('gamepaddisconnected',()=>updateGamepadUI());
 
 function togglePause(){
-  game._padRow=0; // reset focus to "reprendre"
-  // clear pause button highlights
-  ['p-resume','p-restart','p-menu'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.outline='';});
   if(game.state===STATE.RACING){
     game.state=STATE.PAUSE;
     AUDIO.silenceEngine();
     document.getElementById('screen-pause').classList.add('active');
+    // Focus manette sur "Reprendre" + neutraliser les boutons maintenus
+    game._navRow=0;game._navCol=0;_navPrev.ok=true;_navPrev.back=true;game._padNav=performance.now();
+    renderMenuFocus();
   } else if(game.state===STATE.PAUSE){
     game.state=STATE.RACING;
     document.getElementById('screen-pause').classList.remove('active');
+    document.querySelectorAll('.nav-focus,.nav-btn-focus').forEach(e=>e.classList.remove('nav-focus','nav-btn-focus'));
   }
 }
 
@@ -910,23 +914,14 @@ window.addEventListener('keydown',e=>{
   if(e.code==='Escape'&&(game.state===STATE.RACING||game.state===STATE.PAUSE))togglePause();
   if(e.code==='KeyP')PERF.lowRes=!PERF.lowRes;
   if(e.code==='KeyM')AUDIO.toggle();
-  if((e.code==='Enter'||e.code==='Space')&&game.state===STATE.TITLE)goToSelect();
-  if(game.state===STATE.SELECT){
-    const _cur=_selectingP===2?selectedCharP2:selectedChar;
-    const _set=v=>{if(_selectingP===2)selectedCharP2=v;else selectedChar=v;};
-    if(e.code==='ArrowLeft'||e.code==='KeyA'){_set(_cur<0?0:(_cur-1+CHARACTERS.length)%CHARACTERS.length);initCharSelect();AUDIO.beep(660,.06,.1);}
-    if(e.code==='ArrowRight'||e.code==='KeyD'){_set(_cur<0?0:(_cur+1)%CHARACTERS.length);initCharSelect();AUDIO.beep(660,.06,.1);}
-    if((e.code==='Enter'||e.code==='Space')&&_cur>=0)goToDiffSelect();
-  }
-  if(game.state===STATE.DIFF_SELECT){
-    if(e.code==='ArrowLeft'||e.code==='KeyA'){difficulty=(difficulty+2)%3;initDiffSelect();AUDIO.beep(550,.06,.1);}
-    if(e.code==='ArrowRight'||e.code==='KeyD'){difficulty=(difficulty+1)%3;initDiffSelect();AUDIO.beep(550,.06,.1);}
-    if(e.code==='Enter'||e.code==='Space'){goToTrackSelect();}
-  }
-  if(game.state===STATE.TRACK_SELECT){
-    if(e.code==='ArrowLeft'||e.code==='KeyA'){selectedTrackIdx=selectedTrackIdx<0?0:(selectedTrackIdx-1+TRACKS.length)%TRACKS.length;initTrackSelect();AUDIO.beep(660,.06,.1);}
-    if(e.code==='ArrowRight'||e.code==='KeyD'){selectedTrackIdx=selectedTrackIdx<0?0:(selectedTrackIdx+1)%TRACKS.length;initTrackSelect();AUDIO.beep(660,.06,.1);}
-    if((e.code==='Enter'||e.code==='Space')&&selectedTrackIdx>=0){AUDIO.init();AUDIO.resume();startRace();}
+  // Navigation unifiée des menus (clavier)
+  if(game.state!==STATE.RACING&&game.state!==STATE.COUNTDOWN&&!e.repeat){
+    if(e.code==='ArrowUp')menuNav('up');
+    else if(e.code==='ArrowDown')menuNav('down');
+    else if(e.code==='ArrowLeft'||e.code==='KeyA')menuNav('left');
+    else if(e.code==='ArrowRight'||e.code==='KeyD')menuNav('right');
+    else if(e.code==='Enter'||e.code==='Space')menuNav('ok');
+    else if(e.code==='Backspace')menuNav('back');
   }
   // Utiliser l'item en course (une seule fois par appui)
   if((e.code==='ShiftLeft'||e.code==='ShiftRight')&&game.state===STATE.RACING&&!e.repeat){
@@ -1529,10 +1524,159 @@ function showScreen(id){
   document.getElementById('lang-btn').style.display=inGame?'none':'';
   document.getElementById('home-btn').style.display=(inGame||onTitle)?'none':'inline-block';
   document.getElementById('ingame-menu-btn').style.display=inGame?'block':'none';
+  resetMenuFocus(); // focus par défaut + neutraliser les boutons maintenus
+}
+
+/* ====================================================================
+   NAVIGATION UNIFIÉE DES MENUS (clavier + manette + tactile)
+   Chaque écran = liste de "lignes". Une ligne est soit :
+     - un sélecteur (←→ change la valeur)
+     - un groupe de boutons (←→ change de bouton, A active)
+   ↑↓ change de ligne · A active/avance · B recule
+   ==================================================================== */
+const _navPrev={ok:false,back:false}; // détection de front pour A / B (manette)
+
+function defaultNavRow(){ return game.state===STATE.TITLE?1:0; } // titre : focus sur JOUER
+function navBeep(){AUDIO.beep(660,.05,.09);}
+// Réinitialise le focus de navigation pour l'écran courant + exige un relâchement des boutons
+function resetMenuFocus(){
+  game._navRow=defaultNavRow();game._navCol=0;
+  _navPrev.ok=true;_navPrev.back=true;
+  game._padNav=performance.now();
+  renderMenuFocus();
+}
+
+// Étapes de valeur (réutilisent la logique existante)
+function setPlayers(n){
+  game.splitScreen=(n===2);
+  document.querySelectorAll('.player-btn').forEach(x=>x.classList.toggle('active',+x.dataset.players===n));
+}
+function charStep(d){
+  const L=CHARACTERS.length;
+  let cur=_selectingP===2?selectedCharP2:selectedChar; if(cur<0)cur=0;
+  let v=cur,guard=0;
+  do{ v=(v+d+L)%L; guard++; }while(_selectingP===2&&v===selectedChar&&guard<=L);
+  if(_selectingP===2)selectedCharP2=v;else selectedChar=v;
+  initCharSelect();
+}
+function diffStep(d){ difficulty=clamp(difficulty+d,0,2); initDiffSelect(); }
+function lapsStep(d){ const A=[1,3,5]; let i=A.indexOf(selectedLaps); i=clamp(i+d,0,A.length-1); selectedLaps=A[i]; initDiffSelect(); }
+function ccStep(d){ const A=[50,100,150]; let i=A.indexOf(selectedCC); i=clamp(i+d,0,A.length-1); selectedCC=A[i]; initDiffSelect(); }
+function trackStep(d){ const T=TRACKS.length; selectedTrackIdx=((selectedTrackIdx<0?0:selectedTrackIdx)+d+T)%T; initTrackSelect(); }
+function sliderStep(id,delta){ const s=document.getElementById(id); if(!s)return; s.value=clamp(+s.value+delta,0,100); s.dispatchEvent(new Event('input')); }
+
+// Définition des lignes focusables pour l'état courant
+function menuRows(){
+  const S=game.state, byId=id=>document.getElementById(id);
+  if(S===STATE.TITLE) return [
+    {type:'sel', el:byId('player-select-row'), dec:()=>setPlayers(1), inc:()=>setPlayers(2)},
+    {type:'btn', btns:[byId('title-play')]},
+    {type:'btn', btns:[byId('title-stats'),byId('title-settings')]},
+  ];
+  if(S===STATE.SELECT) return [
+    {type:'sel', el:byId('char-row'), dec:()=>charStep(-1), inc:()=>charStep(1)},
+    {type:'btn', btns:[byId('sel-back'),byId('start-sel-btn')]},
+  ];
+  if(S===STATE.DIFF_SELECT) return [
+    {type:'sel', el:byId('diff-cards'), dec:()=>diffStep(-1), inc:()=>diffStep(1)},
+    {type:'sel', el:byId('pad-row-1'), dec:()=>lapsStep(-1), inc:()=>lapsStep(1)},
+    {type:'sel', el:byId('pad-row-2'), dec:()=>ccStep(-1), inc:()=>ccStep(1)},
+    {type:'btn', btns:[byId('diff-back'),byId('diff-next')]},
+  ];
+  if(S===STATE.TRACK_SELECT) return [
+    {type:'sel', el:byId('track-row'), dec:()=>trackStep(-1), inc:()=>trackStep(1)},
+    {type:'btn', btns:[byId('track-back'),byId('start-race-btn')]},
+  ];
+  if(S===STATE.SETTINGS){
+    const mr=byId('set-music-vol'), sr=byId('set-sfx-vol');
+    return [
+      {type:'sel', el:mr?mr.closest('.settings-row'):null, dec:()=>sliderStep('set-music-vol',-5), inc:()=>sliderStep('set-music-vol',5)},
+      {type:'sel', el:sr?sr.closest('.settings-row'):null, dec:()=>sliderStep('set-sfx-vol',-5), inc:()=>sliderStep('set-sfx-vol',5)},
+      {type:'btn', btns:[byId('settings-back')]},
+    ];
+  }
+  if(S===STATE.STATS) return [
+    {type:'btn', btns:[byId('stats-back')]},
+    {type:'btn', btns:[byId('stats-reset')]},
+  ];
+  if(S===STATE.PAUSE) return [
+    {type:'btn', btns:[byId('p-resume')]},
+    {type:'btn', btns:[byId('p-restart')]},
+    {type:'btn', btns:[byId('p-menu')]},
+  ];
+  if(S===STATE.RESULT) return [
+    {type:'btn', btns:[byId('r-replay'),byId('r-menu')]},
+  ];
+  return [];
+}
+
+// Applique la surbrillance de focus sur la ligne/bouton courant
+function renderMenuFocus(){
+  document.querySelectorAll('.nav-focus,.nav-btn-focus').forEach(e=>e.classList.remove('nav-focus','nav-btn-focus'));
+  const rows=menuRows(); if(!rows.length)return;
+  game._navRow=clamp(game._navRow,0,rows.length-1);
+  const row=rows[game._navRow];
+  if(row.type==='sel'){ if(row.el)row.el.classList.add('nav-focus'); }
+  else { game._navCol=clamp(game._navCol,0,row.btns.length-1); const b=row.btns[game._navCol]; if(b)b.classList.add('nav-btn-focus'); }
+}
+
+// Dispatcher central : 'up' 'down' 'left' 'right' 'ok' 'back'
+function menuNav(action){
+  const rows=menuRows(); if(!rows.length)return;
+  game._navRow=clamp(game._navRow,0,rows.length-1);
+  const row=rows[game._navRow];
+  if(action==='up'){ if(game._navRow>0){game._navRow--;game._navCol=0;navBeep();renderMenuFocus();} return; }
+  if(action==='down'){ if(game._navRow<rows.length-1){game._navRow++;game._navCol=0;navBeep();renderMenuFocus();} return; }
+  if(action==='left'||action==='right'){
+    if(row.type==='sel'){ (action==='left'?row.dec:row.inc)(); navBeep(); renderMenuFocus(); }
+    else { const nc=clamp(game._navCol+(action==='left'?-1:1),0,row.btns.length-1); if(nc!==game._navCol){game._navCol=nc;navBeep();renderMenuFocus();} }
+    return;
+  }
+  if(action==='ok'){
+    if(row.type==='btn'){ const b=row.btns[clamp(game._navCol,0,row.btns.length-1)]; if(b&&!b.disabled)b.click(); }
+    else if(game._navRow<rows.length-1){
+      // sélecteur : avance le focus ; sur une rangée de boutons on vise l'action AVANT (SUIVANT/DÉPART = dernier)
+      game._navRow++;
+      const nr=rows[game._navRow];
+      game._navCol=(nr&&nr.type==='btn')?nr.btns.length-1:0;
+      navBeep();renderMenuFocus();
+    }
+    return;
+  }
+  if(action==='back'){
+    const backIds=['sel-back','diff-back','track-back','settings-back','stats-back','p-resume','r-menu'];
+    for(const r of rows){ if(r.type==='btn'){ for(const b of r.btns){ if(b&&backIds.includes(b.id)){b.click();return;} } } }
+    return; // titre : pas de retour
+  }
+}
+
+// Lecture manette pour la navigation menus (directions répétées, A/B en front)
+function pollMenuGamepad(t){
+  const pads=navigator.getGamepads?navigator.getGamepads():null;
+  let gp=null; if(pads){for(let i=0;i<pads.length;i++){if(pads[i]&&pads[i].connected){gp=pads[i];break;}}}
+  if(!gp){_navPrev.ok=true;_navPrev.back=true;return;} // reconnexion : exiger un relâchement avant d'agir
+  const ax=gp.axes, B=i=>gp.buttons[i]&&gp.buttons[i].pressed;
+  const left =ax[0]<-.5||B(14), right=ax[0]>.5||B(15);
+  const up   =ax[1]<-.5||B(12), down =ax[1]>.5||B(13);
+  const okRaw  = B(0)||(gp.buttons[7]&&gp.buttons[7].value>.5)||B(9); // A / RT / Start
+  const backRaw= B(1)||(gp.buttons[6]&&gp.buttons[6].value>.5);       // B / LT
+  // Directions : répétition limitée (maintien = défilement)
+  if((left||right||up||down)&&t-game._padNav>170){
+    if(up)menuNav('up'); else if(down)menuNav('down');
+    else if(left)menuNav('left'); else if(right)menuNav('right');
+    game._padNav=t;
+  }
+  // A / B : déclenchement unique par appui
+  if(okRaw&&!_navPrev.ok)menuNav('ok');
+  if(backRaw&&!_navPrev.back)menuNav('back');
+  _navPrev.ok=okRaw; _navPrev.back=backRaw;
 }
 
 let selectedChar=-1,selectedCharP2=-1,_selectingP=1; // quel joueur choisit (1 ou 2)
 function initCharSelect(){
+  // Toujours avoir une sélection valide (évite un bouton SUIVANT désactivé / P2 sur le perso de P1)
+  if(_selectingP===2){ if(selectedCharP2<0||selectedCharP2===selectedChar)selectedCharP2=(selectedChar+1)%CHARACTERS.length; }
+  else { if(selectedChar<0)selectedChar=0; }
   const row=document.getElementById('char-row');row.innerHTML='';
   const current=_selectingP===2?selectedCharP2:selectedChar;
   const locked=_selectingP===2?selectedChar:-1; // P2 ne peut pas prendre le perso de P1
@@ -1585,6 +1729,7 @@ function goToSelect(){
 
 let selectedTrackIdx=-1; // -1 = rien de sélectionné par défaut
 function initTrackSelect(){
+  if(selectedTrackIdx<0)selectedTrackIdx=0; // sélection par défaut → DÉPART toujours actif
   const row=document.getElementById('track-row');row.innerHTML='';
   TRACKS.forEach((tr,i)=>{
     const card=document.createElement('div');card.className='track-card'+(i===selectedTrackIdx?' sel':'');
@@ -1625,12 +1770,11 @@ function drawTrackMinimap(c,track,w,h){
 function buildCenterlineLight(cps,perSeg){const pts=[],n=cps.length;for(let i=0;i<n;i++){const p0=cps[(i-1+n)%n],p1=cps[i],p2=cps[(i+1)%n],p3=cps[(i+2)%n];for(let s=0;s<perSeg;s++){const t=s/perSeg,tt=t*t,ttt=tt*t;pts.push({x:0.5*((2*p1.x)+(-p0.x+p2.x)*t+(2*p0.x-5*p1.x+4*p2.x-p3.x)*tt+(-p0.x+3*p1.x-3*p2.x+p3.x)*ttt),y:0.5*((2*p1.y)+(-p0.y+p2.y)*t+(2*p0.y-5*p1.y+4*p2.y-p3.y)*tt+(-p0.y+3*p1.y-3*p2.y+p3.y)*ttt)});}}return pts;}
 function goToDiffSelect(){
   // En 2P : P1 vient de valider → passer à la sélection P2
-  if(game.splitScreen&&_selectingP===1){_selectingP=2;initCharSelect();return;}
+  if(game.splitScreen&&_selectingP===1){_selectingP=2;initCharSelect();resetMenuFocus();return;}
   game.state=STATE.DIFF_SELECT;
   initDiffSelect();showScreen('screen-diff');
 }
 function initDiffSelect(){
-  game._padRow=Math.min(game._padRow,2);
   document.querySelectorAll('#diff-cards .diff-card').forEach(c=>{
     c.classList.toggle('sel',+c.dataset.d===difficulty);
   });
@@ -1640,14 +1784,6 @@ function initDiffSelect(){
   document.querySelectorAll('.lap-btn[data-cc]').forEach(b=>{
     b.classList.toggle('sel',+b.dataset.cc===selectedCC);
   });
-  // Surbrillance de la ligne active (navigation manette)
-  [1,2].forEach(i=>{
-    const el=document.getElementById('pad-row-'+i);
-    if(el)el.classList.toggle('pad-row-focus',i===game._padRow);
-  });
-  // diff-cards n'a pas d'id pad-row-0, utiliser diff-cards directement
-  const dc=document.getElementById('diff-cards');
-  if(dc)dc.classList.toggle('pad-row-focus',game._padRow===0);
 }
 // Dessiner les icônes pixel art des cartes de difficulté au premier appel
 (function(){
@@ -1947,115 +2083,9 @@ function loop(t){
 
   INPUT.update();
 
-  // Navigation manette — tous les menus
+  // Navigation manette — tous les menus (système de focus unifié)
   if(game.state!==STATE.RACING&&game.state!==STATE.COUNTDOWN){
-    if(t-game._padNav>200){
-      const gp=navigator.getGamepads?navigator.getGamepads()[0]:null;
-      if(gp){
-        const left =(gp.axes[0]<-.5)||(gp.buttons[14]?.pressed);
-        const right=(gp.axes[0]>.5) ||(gp.buttons[15]?.pressed);
-        const up   =(gp.axes[1]<-.5)||(gp.buttons[12]?.pressed);
-        const down =(gp.axes[1]>.5) ||(gp.buttons[13]?.pressed);
-        const ok   = gp.buttons[0]?.pressed||gp.buttons[7]?.value>.5; // A ou RT
-        const back = gp.buttons[1]?.pressed||gp.buttons[6]?.value>.5; // B ou LT
-        const start= gp.buttons[9]?.pressed;
-        const beep=()=>{AUDIO.beep(660,.06,.1);game._padNav=t;};
-        const beepBack=()=>{AUDIO.beep(400,.08,.1);game._padNav=t;};
-
-        // ---- TITLE ----
-        if(game.state===STATE.TITLE){
-          if(left||right){
-            _selectingP=_selectingP===1?2:1;
-            document.getElementById('btn-1p-title').classList.toggle('active',_selectingP===1);
-            document.getElementById('btn-2p-title').classList.toggle('active',_selectingP===2);
-            beep();
-          }
-          if(ok||start){goToSelect();game._padNav=t;}
-        }
-
-        // ---- SELECT (personnage) ----
-        else if(game.state===STATE.SELECT){
-          const cur=_selectingP===2?selectedCharP2:selectedChar;
-          if(left){
-            const v=cur<0?0:(cur-1+CHARACTERS.length)%CHARACTERS.length;
-            if(_selectingP===2)selectedCharP2=v;else selectedChar=v;
-            initCharSelect();beep();
-          }
-          if(right){
-            const v=cur<0?0:(cur+1)%CHARACTERS.length;
-            if(_selectingP===2)selectedCharP2=v;else selectedChar=v;
-            initCharSelect();beep();
-          }
-          if(ok&&cur>=0){goToDiffSelect();game._padNav=t;}
-          if(back){
-            if(game.splitScreen&&_selectingP===2){_selectingP=1;initCharSelect();beepBack();}
-            else{game.state=STATE.TITLE;menuMusicPlay();showScreen('screen-title');beepBack();}
-          }
-        }
-
-        // ---- DIFF_SELECT (difficulté / tours / CC) ----
-        // ↑↓ navigue les lignes · ←→ change la valeur · A=suivant · B=retour
-        else if(game.state===STATE.DIFF_SELECT){
-          const LAPS=[1,3,5], CCS=[50,100,150];
-          if(up)  {game._padRow=Math.max(0,game._padRow-1);initDiffSelect();beep();}
-          if(down){game._padRow=Math.min(2,game._padRow+1);initDiffSelect();beep();}
-          if(game._padRow===0){
-            if(left) {difficulty=Math.max(0,difficulty-1);initDiffSelect();beep();}
-            if(right){difficulty=Math.min(2,difficulty+1);initDiffSelect();beep();}
-          } else if(game._padRow===1){
-            const ci=LAPS.indexOf(selectedLaps);
-            if(left) {selectedLaps=LAPS[Math.max(0,ci-1)];initDiffSelect();beep();}
-            if(right){selectedLaps=LAPS[Math.min(LAPS.length-1,ci+1)];initDiffSelect();beep();}
-          } else if(game._padRow===2){
-            const ci=CCS.indexOf(selectedCC);
-            if(left) {selectedCC=CCS[Math.max(0,ci-1)];initDiffSelect();beep();}
-            if(right){selectedCC=CCS[Math.min(CCS.length-1,ci+1)];initDiffSelect();beep();}
-          }
-          if(ok||start){document.getElementById('diff-next').click();game._padNav=t;}
-          if(back){document.getElementById('diff-back').click();game._padNav=t;}
-        }
-
-        // ---- TRACK_SELECT ----
-        else if(game.state===STATE.TRACK_SELECT){
-          if(left){selectedTrackIdx=(selectedTrackIdx-1+TRACKS.length)%TRACKS.length;initTrackSelect();beep();}
-          if(right){selectedTrackIdx=(selectedTrackIdx+1)%TRACKS.length;initTrackSelect();beep();}
-          if(ok||start){startRace();game._padNav=t;}
-          if(back){game.state=STATE.DIFF_SELECT;initDiffSelect();showScreen('screen-diff');beepBack();}
-        }
-
-        // ---- PAUSE ----
-        else if(game.state===STATE.PAUSE){
-          if(up)  {game._padRow=Math.max(0,game._padRow-1);beep();}
-          if(down){game._padRow=Math.min(2,game._padRow+1);beep();}
-          const pauseBtns=['p-resume','p-restart','p-menu'];
-          pauseBtns.forEach((id,i)=>document.getElementById(id).style.outline=i===game._padRow?'3px solid #F4D03F':'');
-          if(ok||start){document.getElementById(pauseBtns[game._padRow]).click();game._padNav=t;}
-          if(back){document.getElementById('p-resume').click();game._padNav=t;}
-        }
-
-        // ---- RESULT ----
-        else if(game.state===STATE.RESULT){
-          if(ok||start){document.getElementById('r-replay').click();game._padNav=t;}
-          if(back){document.getElementById('r-menu').click();game._padNav=t;}
-        }
-
-        // ---- SETTINGS ----
-        else if(game.state===STATE.SETTINGS){
-          const mvSlider=document.getElementById('mv-slider');
-          const sfxSlider=document.getElementById('sfx-slider');
-          if(up||down){game._padRow=game._padRow===0?1:0;beep();}
-          const slider=game._padRow===0?mvSlider:sfxSlider;
-          if(left) {slider.value=Math.max(0,+slider.value-5);slider.dispatchEvent(new Event('input'));beep();}
-          if(right){slider.value=Math.min(100,+slider.value+5);slider.dispatchEvent(new Event('input'));beep();}
-          if(back||ok){document.getElementById('settings-back').click();game._padNav=t;}
-        }
-
-        // ---- STATS ----
-        else if(game.state===STATE.STATS){
-          if(ok||back||start){document.getElementById('stats-back').click();game._padNav=t;}
-        }
-      }
-    }
+    pollMenuGamepad(t);
   }
 
   if(game.state===STATE.COUNTDOWN){
@@ -2102,7 +2132,7 @@ function init(){
   });
   document.getElementById('start-sel-btn').addEventListener('click',()=>{AUDIO.init();AUDIO.resume();goToDiffSelect();});
   document.getElementById('sel-back').addEventListener('click',()=>{
-    if(game.splitScreen&&_selectingP===2){_selectingP=1;selectedChar=-1;initCharSelect();AUDIO.beep(500,.05,.1);}
+    if(game.splitScreen&&_selectingP===2){_selectingP=1;selectedChar=-1;initCharSelect();resetMenuFocus();AUDIO.beep(500,.05,.1);}
     else{game.state=STATE.TITLE;menuMusicPlay();showScreen('screen-title');AUDIO.beep(500,.05,.1);}
   });
   document.getElementById('track-back').addEventListener('click',()=>{
@@ -2137,6 +2167,9 @@ function init(){
   // Statistiques (stopPropagation : éviter que le pointerdown du titre lance la sélection)
   document.getElementById('title-stats').addEventListener('pointerdown',e=>{e.stopPropagation();AUDIO.init();AUDIO.resume();goToStats();});
   document.getElementById('title-settings').addEventListener('pointerdown',e=>{e.stopPropagation();AUDIO.init();AUDIO.resume();goToSettings();});
+  // Activation au clavier/manette (le .click() ne déclenche pas pointerdown)
+  document.getElementById('title-stats').addEventListener('click',()=>{if(game.state===STATE.TITLE){AUDIO.init();AUDIO.resume();goToStats();}});
+  document.getElementById('title-settings').addEventListener('click',()=>{if(game.state===STATE.TITLE){AUDIO.init();AUDIO.resume();goToSettings();}});
   initSettings();
   document.getElementById('stats-back').addEventListener('click',()=>{game.state=STATE.TITLE;menuMusicPlay();showScreen('screen-title');});
   document.getElementById('stats-reset').addEventListener('click',()=>{resetStats();renderStats();AUDIO.beep(330,.1,.12);});
