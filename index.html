@@ -702,7 +702,7 @@ function _buildPixelEmoji(emoji,srcPx,dstPx){
 }
 function drawPixelIcon(canvasEl,type){
   // type = clé ITEM_INFO (CHAPPAL…) ou clé DIFF_ICONS (LEAF…)
-  const emoji=(ITEM_INFO[type]?.icon)||(DIFF_ICONS[type]);
+  const emoji=(ITEM_INFO[type]&&ITEM_INFO[type].icon)||(DIFF_ICONS[type]);
   if(!emoji||!canvasEl)return;
   const sz=canvasEl.width;
   const src=Math.max(6,Math.round(sz/3)); // 3× pixel scale — plus de pixels, même style que menu
@@ -1081,8 +1081,8 @@ const INPUT={
       // Axis brut pour steering analogique (deadzone 0.12)
       const rawAxis=Math.abs(gp.axes[0])>0.12 ? gp.axes[0] : 0;
       // Gaz analogique via RT (axes[7] ou buttons[7].value)
-      const accelAxis=Math.max(gp.axes[7]??0, gp.buttons[7]?.value??0, gp.axes[6]<-0.25?0.6:0);
-      const brakeAxis=Math.max(gp.axes[6]??0, gp.buttons[6]?.value??0);
+      const accelAxis=Math.max((gp.axes[7]!=null?gp.axes[7]:0), (gp.buttons[7]&&gp.buttons[7].value!=null?gp.buttons[7].value:0), (gp.axes[6]<-0.25?0.6:0));
+      const brakeAxis=Math.max((gp.axes[6]!=null?gp.axes[6]:0), (gp.buttons[6]&&gp.buttons[6].value!=null?gp.buttons[6].value:0));
       this.gamepad={left:dLeft,right:dRight,accel:dAccel,brake:dBrake,use:dUse,
                     steerAxis:rawAxis, accelAxis:Math.min(accelAxis,1), brakeAxis:Math.min(brakeAxis,1)};
     } else {
@@ -1985,7 +1985,7 @@ document.addEventListener('visibilitychange',()=>{
     AUDIO.silenceEngine();
   } else {
     if(m._wasPlaying){m.play().catch(()=>{});m._wasPlaying=false;}
-    if(game.state===STATE.RACING&&!game.paused)AUDIO.resumeEngine?.();
+    if(game.state===STATE.RACING&&!game.paused&&AUDIO.resumeEngine)AUDIO.resumeEngine();
   }
 });
 
