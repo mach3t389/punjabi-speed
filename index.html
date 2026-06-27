@@ -975,8 +975,8 @@ const SFX_FILES={
   drop_1:   ['Banana (Hanuman).m4a'],
   // se faire toucher / glisser — Babypie
   stun_2:   ['Got hit and slipping (babypie).m4a'],
-  // ramassage d'item — Hanuman
-  pickup_1: ['Got it (Hanuman).m4a'],
+  // se faire toucher — Hanuman
+  stun_1:   ['Got it (Hanuman).m4a'],
   // résultats par personnage
   win_1:    ['First place (Hanuman).m4a'],
   podium_2: ['Podium (Babypie).m4a'],
@@ -1433,7 +1433,7 @@ function checkPickups(){
         box.respawnIn=ITEM_RESPAWN;
         k.item=pickRandom(ITEM_LIST);
         AUDIO.beep(880,.08,.14,k.x,k.y);
-        if(isHuman(k))SFX.playChar('pickup',k.char.id,null,.85); // Hanuman a "Got it"
+        if(isHuman(k))SFX.playChar('pickup',k.char.id,null,.85);
         if(k.isPlayer)showNotif(" "+ITEM_INFO[k.item].label,600,k.item);
       }
     }
