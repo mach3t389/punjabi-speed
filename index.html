@@ -1011,10 +1011,19 @@ const SFX={
     a.play().catch(()=>{});
     return true;
   },
-  // variante propre au perso (prefix_charId) sinon repli (ou rien si fallback null)
-  playChar(prefix,charId,fallbackKey,vol){
+  // variante propre au perso (prefix_charId) sinon repli (charId ou key)
+  playChar(prefix,charId,fallback,vol,delay){
+    if(delay){
+      setTimeout(()=>this.playChar(prefix,charId,fallback,vol),delay);
+      return true;
+    }
     if(this.play(prefix+'_'+charId,vol))return true;
-    return fallbackKey?this.play(fallbackKey,vol):false;
+    if(fallback==null)return false;
+    // fallback peut être un charId (nombre) ou une clé (string)
+    if(typeof fallback==='number'){
+      return this.play(prefix+'_'+fallback,vol);
+    }
+    return this.play(fallback,vol);
   },
 };
 function isHuman(k){return !!(k&&(k.isPlayer||k.isP2));}
@@ -1483,7 +1492,7 @@ function useItem(k){
     const bx=k.x-Math.cos(k.angle)*28, by=k.y-Math.sin(k.angle)*28;
     game.droppedItems.push({x:bx,y:by,type:'DOSA',life:900,ownerId:k.char.id});
     AUDIO.beep(380,.14,.12,k.x,k.y);setTimeout(()=>AUDIO.beep(280,.10,.10,k.x,k.y),80);
-    if(isHuman(k))SFX.playChar('drop',k.char.id,'throw',.85); // Hanuman a sa voix "Banana"
+    if(isHuman(k))SFX.playChar('drop',k.char.id,1,.85); // fallback à Hanuman
     if(k.isPlayer)showNotif("🫓 DOSA!",600,'DOSA');
     return;
   }
@@ -1581,7 +1590,7 @@ function updateDroppedItems(dt){
 function playAttackerHit(ownerId,victim){
   const owner=game.karts.find(kk=>kk.char.id===ownerId);
   if(!isHuman(owner))return;
-  SFX.playChar('hit',owner.char.id,null,1.0);
+  SFX.playChar('hit',owner.char.id,0,1.0); // fallback à Boogerman si perso n'a pas de voix
   if(victim&&computePlace(victim)===1&&Math.random()<0.25)SFX.play('laugh',.9);
 }
 
@@ -1591,7 +1600,7 @@ function stunKart(k,type){
   const dur={CHAPPAL:60,CUILLERE:42,OIGNON:70,DOSA:48,KURKURE:35}[type]||50;
   k.stunTime=dur;
   AUDIO.beep(220,.22,.18,k.x,k.y);
-  if(isHuman(k))SFX.playChar('stun',k.char.id,null,1.0); // voix victime (Babypie a "got hit and slipping")
+  if(isHuman(k))SFX.playChar('stun',k.char.id,2,1.0,100); // delay 100ms pour éviter chevauchement
   if(k.isPlayer){showNotif("💥 TOUCHÉ!",700);hudEl.classList.add('stun');setTimeout(()=>hudEl.classList.remove('stun'),700);}
 }
 
@@ -2051,11 +2060,12 @@ function showResult(){
   const place=ranking.indexOf(game.player)+1;
   // Voix de résultat selon le perso du joueur (après la fanfare de fin)
   const _cid=game.player.char.id,_n=ranking.length;
+  const voiceDelay=place===1?500:place===_n?600:550; // décaler pour éviter chevauchement
   setTimeout(()=>{
-    if(place===1)SFX.playChar('win',_cid,'win_any',1.0);
-    else if(place===_n)SFX.playChar('last',_cid,null,1.0);
-    else SFX.playChar('podium',_cid,null,.95); // 2e–3e : voix dédiée si dispo (Babypie)
-  },500);
+    if(place===1)SFX.playChar('win',_cid,1,1.0); // fallback à Hanuman
+    else if(place===_n)SFX.playChar('last',_cid,1,1.0); // fallback à Hanuman
+    else SFX.playChar('podium',_cid,2,.95); // fallback à Babypie
+  },voiceDelay);
   document.getElementById('r-pos').textContent=ordinal(place);
   document.getElementById('r-time').textContent=formatTime(game.player.finishTime||game.raceTime);
   let html='';ranking.forEach((k,i)=>{
