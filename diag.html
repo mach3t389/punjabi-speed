@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PUNJABI SPEED — Diagnostic</title>
+<style>
+  /* Pure ES5 / old-browser-safe styling, big text for a car screen */
+  html,body{margin:0;padding:0;background:#10131a;color:#e8eef5;font-family:monospace;font-size:18px;line-height:1.5;}
+  #wrap{padding:14px 16px;}
+  h1{font-size:22px;color:#FFC83D;margin:0 0 10px;}
+  .row{margin:4px 0;word-break:break-word;}
+  .k{color:#7fb0d8;}
+  .ok{color:#5fe08a;font-weight:bold;}
+  .bad{color:#ff6b6b;font-weight:bold;}
+  .box{border:1px solid #2a3340;border-radius:8px;padding:10px 12px;margin:10px 0;background:#161b24;}
+  #verdict{font-size:20px;font-weight:bold;padding:12px;border-radius:8px;text-align:center;margin:12px 0;}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <h1>PUNJABI SPEED — Diagnostic</h1>
+  <div id="verdict">Running checks...</div>
+  <div class="box" id="env"></div>
+  <div class="box" id="feat"></div>
+  <p style="color:#7fb0d8;font-size:14px;">Read the GREEN/RED results to me, or send a photo of this screen.</p>
+</div>
+<script>
+/* Deliberately written in OLD (ES5) JavaScript so it renders even on
+   very old WebViews — its job is to report what the radio supports. */
+(function(){
+  function el(id){return document.getElementById(id);}
+  function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;');}
+
+  /* ---- Environment ---- */
+  var ua = navigator.userAgent || 'unknown';
+  var chrome = (ua.match(/Chrom(e|ium)\/([0-9]+)/) || [])[2] || 'not found';
+  var android = (ua.match(/Android\s+([0-9.]+)/) || [])[1] || 'not Android';
+  var sw = (window.screen && screen.width) || 0;
+  var sh = (window.screen && screen.height) || 0;
+  var iw = window.innerWidth || 0;
+  var ih = window.innerHeight || 0;
+  var dpr = window.devicePixelRatio || 1;
+
+  var envHtml = '';
+  envHtml += '<div class="row"><span class="k">Browser engine:</span> Chromium ' + esc(chrome) + '</div>';
+  envHtml += '<div class="row"><span class="k">Android version:</span> ' + esc(android) + '</div>';
+  envHtml += '<div class="row"><span class="k">Screen:</span> ' + sw + ' x ' + sh + '  (window ' + iw + ' x ' + ih + ', dpr ' + dpr + ')</div>';
+  envHtml += '<div class="row" style="font-size:13px;color:#8a97a8;margin-top:8px;">' + esc(ua) + '</div>';
+  el('env').innerHTML = envHtml;
+
+  /* ---- Feature tests ---- */
+  function synTest(code){ try { new Function(code); return true; } catch(e){ return false; } }
+  function runTest(fn){ try { return !!fn(); } catch(e){ return false; } }
+
+  var tests = [
+    ['ES2020: optional chaining  ?.', function(){ return synTest('var a={};return a?.b;'); }],
+    ['ES2020: nullish coalescing ??', function(){ return synTest('var a=null;return a??1;'); }],
+    ['ES6: arrow functions',          function(){ return synTest('var f=()=>1;return f();'); }],
+    ['ES6: classes',                  function(){ return synTest('class C{};return C;'); }],
+    ['ES6: template literals',        function(){ return synTest('var x=1;return `v${x}`;'); }],
+    ['ES6: let / const',              function(){ return synTest('let a=1;const b=2;return a+b;'); }],
+    ['Object.assign',                 function(){ return typeof Object.assign === 'function'; }],
+    ['Array.from',                    function(){ return typeof Array.from === 'function'; }],
+    ['String.padStart',              function(){ return typeof ''.padStart === 'function'; }],
+    ['Array.includes / find',         function(){ return typeof [].includes==='function' && typeof [].find==='function'; }],
+    ['requestAnimationFrame',         function(){ return typeof window.requestAnimationFrame === 'function'; }],
+    ['Canvas 2D context',             function(){ var c=document.createElement('canvas'); return !!(c.getContext && c.getContext('2d')); }],
+    ['HTML5 Audio',                   function(){ return typeof window.Audio === 'function'; }],
+    ['Web Audio API',                 function(){ return !!(window.AudioContext || window.webkitAudioContext); }],
+    ['Gamepad API (USB controller)',  function(){ return typeof navigator.getGamepads === 'function'; }]
+  ];
+
+  var featHtml = '';
+  var critical = ['ES6: arrow functions','ES6: classes','ES6: template literals','ES6: let / const','Canvas 2D context','requestAnimationFrame'];
+  var failedCritical = 0;
+  for (var i = 0; i < tests.length; i++) {
+    var name = tests[i][0];
+    var pass = runTest(tests[i][1]);
+    if (!pass && critical.indexOf(name) !== -1) failedCritical++;
+    featHtml += '<div class="row">' + (pass ? '<span class="ok">PASS</span>' : '<span class="bad">FAIL</span>') + '  ' + esc(name) + '</div>';
+  }
+  el('feat').innerHTML = featHtml;
+
+  /* ---- Verdict ---- */
+  var v = el('verdict');
+  if (failedCritical === 0) {
+    v.style.background = '#143a22'; v.style.color = '#5fe08a';
+    v.innerHTML = 'GOOD — this browser can run the game. If index.html is still black, recheck you copied the FIXED file.';
+  } else {
+    v.style.background = '#3a1414'; v.style.color = '#ff8a8a';
+    v.innerHTML = 'TOO OLD — this browser is missing ' + failedCritical + ' essential feature(s). Install Firefox for Android, or ask me for a transpiled build.';
+  }
+})();
+</script>
+</body>
+</html>
