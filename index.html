@@ -154,33 +154,21 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; font-fam
 .go-back{background:rgba(255,255,255,.12);color:#ccc;box-shadow:0 5px 0 #333;}
 .go-back:active{box-shadow:0 1px 0 #333;}
 
-/* ---- Sélecteur de difficulté ---- */
-.params-section-label{font-size:clamp(9px,1.4vw,11px);font-weight:bold;letter-spacing:3px;color:#FFC83D;opacity:.85;text-align:center;margin:8px 0 5px;}
-.diff-card{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.18);cursor:pointer;transition:.15s;text-align:center;margin-right:5px;min-width:clamp(54px,9vw,72px);}
-.diff-card:last-child{margin-right:0;}
-.diff-card:hover{background:rgba(255,200,60,.12);border-color:rgba(255,200,60,.5);color:#fff;}
-.diff-card.sel{background:rgba(255,200,60,.22);border-color:#FFC83D;}
-.diff-card-icon{display:flex;justify-content:center;}
-.diff-icon-canvas{width:clamp(20px,3.5vw,28px);height:clamp(20px,3.5vw,28px);image-rendering:pixelated;image-rendering:crisp-edges;}
-.diff-card-label{font-size:clamp(8px,1.3vw,10px);font-weight:bold;letter-spacing:1px;color:rgba(255,255,255,.7);}
-.diff-card.sel .diff-card-label{color:#FFC83D;}
-.params-group{width:100%;background:rgba(0,0,0,.28);border:1px solid rgba(255,200,60,.15);border-radius:12px;overflow:hidden;margin-top:8px;display:table;border-collapse:collapse;}
-.lap-select-row{display:table-row;}
-.lap-select-row:not(:last-child){border-bottom:1px solid rgba(255,200,60,.10);}
-.lap-select-label{display:table-cell;font-size:clamp(9px,1.5vw,12px);font-weight:bold;letter-spacing:2px;color:rgba(255,255,255,.6);padding:8px 14px;white-space:nowrap;border-right:1px solid rgba(255,200,60,.10);}
-.lap-btns{display:table-cell;padding:6px 14px;vertical-align:middle;white-space:nowrap;}
-.lap-btn{background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.18);border-radius:8px;color:rgba(255,255,255,.7);font-family:inherit;font-size:clamp(11px,1.8vw,14px);font-weight:bold;width:clamp(36px,6vw,46px);height:clamp(28px,4vw,36px);cursor:pointer;transition:.15s;}
-.lap-btn:hover{background:rgba(255,200,60,.12);border-color:rgba(255,200,60,.5);color:#fff;}
-.lap-btn.sel{background:rgba(255,200,60,.22);border-color:#FFC83D;color:#FFC83D;}
+/* ---- Réglages de course : grille label + 3 options égales ---- */
+.params-rows{width:100%;display:flex;flex-direction:column;gap:9px;margin-top:8px;}
+.prow{display:flex;align-items:stretch;gap:12px;width:100%;}
+.prow-label{width:clamp(74px,15vw,104px);flex-shrink:0;display:flex;align-items:center;justify-content:center;text-align:center;font-size:clamp(9px,1.5vw,12px);font-weight:bold;letter-spacing:2px;color:#FFC83D;}
+.opt-grid{flex:1;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.opt-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;height:clamp(46px,8vw,58px);border-radius:10px;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.16);color:rgba(255,255,255,.65);font-family:inherit;font-weight:bold;font-size:clamp(12px,2vw,16px);cursor:pointer;transition:.15s;}
+.opt-btn:hover{background:rgba(255,200,60,.12);border-color:rgba(255,200,60,.5);color:#fff;}
+.opt-btn.sel{background:rgba(255,200,60,.20);border-color:#FFC83D;color:#FFC83D;box-shadow:0 0 12px rgba(255,200,60,.22);}
+.opt-icon{width:clamp(20px,3.5vw,26px);height:clamp(20px,3.5vw,26px);image-rendering:pixelated;image-rendering:crisp-edges;}
+.opt-sublabel{font-size:clamp(8px,1.2vw,10px);letter-spacing:1px;}
 .pad-row-focus{outline:2px solid #F4D03F;outline-offset:4px;border-radius:10px;}
 .nav-focus{outline:3px solid #fff;outline-offset:5px;border-radius:12px;box-shadow:0 0 0 6px rgba(0,200,255,.25);animation:navpulse 1s ease-in-out infinite;}
 .nav-btn-focus{outline:3px solid #fff;outline-offset:3px;filter:brightness(1.1);box-shadow:0 0 0 5px rgba(0,200,255,.3),0 0 18px rgba(0,200,255,.6);animation:navpulse 1s ease-in-out infinite;}
 .menu-pixel-icon{image-rendering:pixelated;image-rendering:crisp-edges;vertical-align:middle;display:inline-block;width:1.15em;height:1.15em;}
 @keyframes navpulse{50%{box-shadow:0 0 0 8px rgba(0,200,255,.12),0 0 22px rgba(0,200,255,.45);}}
-.lap-btn{background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.18);border-radius:8px;color:rgba(255,255,255,.7);font-family:inherit;font-size:clamp(11px,1.8vw,14px);font-weight:bold;width:clamp(36px,6vw,46px);height:clamp(28px,4vw,36px);cursor:pointer;transition:.15s;margin-right:5px;}
-.lap-btn:last-child{margin-right:0;}
-.lap-btn:hover{background:rgba(255,200,60,.12);border-color:rgba(255,200,60,.5);color:#fff;}
-.lap-btn.sel{background:rgba(244,208,63,.22);border-color:#F4D03F;color:#F4D03F;}
 
 /* ---- Sous-titre tagline ---- */
 .title-tagline{margin-top:12px;margin-bottom:2px;font-size:clamp(15px,3vw,26px);color:#F4D03F;letter-spacing:5px;font-weight:900;text-shadow:2px 2px 0 #000;}
@@ -260,43 +248,34 @@ input[type=range].pk-slider::-moz-range-thumb{width:20px;height:20px;border-radi
   <div class="params-inner">
     <div class="select-title" data-i18n="race_params">PARAMÈTRES DE COURSE</div>
 
-    <div class="params-group">
-      <div class="lap-select-row">
-        <span class="lap-select-label" data-i18n="set_diff">DIFFICULTÉ</span>
-        <div class="lap-btns diff-cards" id="diff-cards">
-          <div class="diff-card" data-d="0">
-            <div class="diff-card-icon"><canvas class="diff-icon-canvas" data-icon="LEAF" width="32" height="32"></canvas></div>
-            <div class="diff-card-label" data-i18n="diff_easy">FACILE</div>
-          </div>
-          <div class="diff-card sel" data-d="1">
-            <div class="diff-card-icon"><canvas class="diff-icon-canvas" data-icon="BOLT" width="32" height="32"></canvas></div>
-            <div class="diff-card-label" data-i18n="diff_normal">NORMAL</div>
-          </div>
-          <div class="diff-card" data-d="2">
-            <div class="diff-card-icon"><canvas class="diff-icon-canvas" data-icon="SKULL" width="32" height="32"></canvas></div>
-            <div class="diff-card-label" data-i18n="diff_hard">DIFFICILE</div>
-          </div>
+    <div class="params-rows">
+      <div class="prow">
+        <div class="prow-label" data-i18n="set_diff">DIFFICULTÉ</div>
+        <div class="opt-grid" id="diff-cards">
+          <button class="opt-btn diff-card" data-d="0"><canvas class="opt-icon diff-icon-canvas" data-icon="LEAF" width="32" height="32"></canvas><span class="opt-sublabel" data-i18n="diff_easy">FACILE</span></button>
+          <button class="opt-btn diff-card sel" data-d="1"><canvas class="opt-icon diff-icon-canvas" data-icon="BOLT" width="32" height="32"></canvas><span class="opt-sublabel" data-i18n="diff_normal">NORMAL</span></button>
+          <button class="opt-btn diff-card" data-d="2"><canvas class="opt-icon diff-icon-canvas" data-icon="SKULL" width="32" height="32"></canvas><span class="opt-sublabel" data-i18n="diff_hard">DIFFICILE</span></button>
         </div>
       </div>
-      <div class="lap-select-row" id="pad-row-1">
-        <span class="lap-select-label" data-i18n="set_laps">TOURS</span>
-        <div class="lap-btns">
-          <button class="lap-btn" data-laps="1">1</button>
-          <button class="lap-btn sel" data-laps="3">3</button>
-          <button class="lap-btn" data-laps="5">5</button>
+      <div class="prow">
+        <div class="prow-label" data-i18n="set_laps">TOURS</div>
+        <div class="opt-grid" id="pad-row-1">
+          <button class="opt-btn lap-btn" data-laps="1">1</button>
+          <button class="opt-btn lap-btn sel" data-laps="3">3</button>
+          <button class="opt-btn lap-btn" data-laps="5">5</button>
         </div>
       </div>
-      <div class="lap-select-row" id="pad-row-2">
-        <span class="lap-select-label" data-i18n="set_cc">CC</span>
-        <div class="lap-btns">
-          <button class="lap-btn" data-cc="50">50</button>
-          <button class="lap-btn sel" data-cc="100">100</button>
-          <button class="lap-btn" data-cc="150">150</button>
+      <div class="prow">
+        <div class="prow-label" data-i18n="set_cc">CC</div>
+        <div class="opt-grid" id="pad-row-2">
+          <button class="opt-btn lap-btn" data-cc="50">50</button>
+          <button class="opt-btn lap-btn sel" data-cc="100">100</button>
+          <button class="opt-btn lap-btn" data-cc="150">150</button>
         </div>
       </div>
     </div>
 
-    <div class="screen-nav-row" id="pad-row-3" style="margin-top:10px;">
+    <div class="screen-nav-row" id="pad-row-3" style="margin-top:16px;">
       <button class="go-btn go-back" id="diff-back">◀ RETOUR</button>
       <button class="go-btn" id="diff-next">SUIVANT ▶</button>
     </div>
