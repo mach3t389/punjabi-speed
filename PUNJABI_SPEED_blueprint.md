@@ -199,16 +199,25 @@ Tous définis par des **splines Catmull-Rom** sur une grille monde 1000×1000. T
 | KURKURE | 🍿 | Scatter + bouclier | Lance 5 morceaux en cône avant + 2s de protection croustillante (starTime=120) | 35 |
 
 ### Système d'icônes pixelisées (`_buildPixelEmoji`)
-1. Rend l'emoji à petite taille (`srcPx ≈ sz/4`)
-2. Scale up en `imageSmoothingEnabled=false` → pixels carrés visibles
-3. **Utilisé partout de façon cohérente** :
-   - Inventaire HUD → `drawPixelIcon(canvas, type)`
-   - Icône centre-écran → `drawPixelIcon(_icC, type)`
-   - Projectile en vol 3D → `drawProjectile()` → `_buildPixelEmoji(info.icon, src, sz)`
-   - Item posé au sol 3D → `drawDroppedItem()` → `_buildPixelEmoji(info.icon, src, sz)`
-   - Boutons du menu → canvas `data-emoji` initialisés au démarrage
 
-> **Règle absolue** : tout nouvel item doit passer par `_buildPixelEmoji`. Ne jamais utiliser `fillText` emoji directement sur le canvas de jeu — ça briserait la cohérence pixel art.
+**Ratio standard : `srcPx = Math.max(6, Math.round(sz/3))`** — 3× upscale, appliqué partout sans exception.
+
+Pipeline :
+1. Rend l'emoji à taille source (`srcPx = sz/3`) sur un canvas temporaire
+2. Scale up en `imageSmoothingEnabled=false` → pixels carrés bien nets
+3. Résultat mis en cache dans `_emojiCache[emoji_src_dst]`
+
+**Utilisé partout de façon cohérente** :
+| Contexte | Fonction | sz typique |
+|---|---|---|
+| Inventaire HUD (centre écran) | `drawPixelIcon(_icC, type)` | 52–76px |
+| Icône HUD mineure | `drawPixelIcon(hudIc, type)` | idem |
+| Icône split-screen (kart ennemi) | `_buildPixelEmoji` inline | 16px |
+| Projectile en vol 3D | `drawProjectile()` | scale×22 |
+| Item posé au sol 3D | `drawDroppedItem()` | scale×18 |
+| Boutons du menu | canvas `data-emoji` dans `init()` | 28–32px |
+
+> **Règle absolue** : tout nouvel item ou icône de menu doit passer par `_buildPixelEmoji` avec `srcPx = Math.max(6, Math.round(sz/3))`. Ne jamais utiliser `fillText` emoji directement sur le canvas de jeu — ça briserait la cohérence pixel art.
 
 ### Comportement KURKURE (remplace l'étoile)
 Kart protégé pendant `starTime > 0` (120 frames ≈ 2s) :

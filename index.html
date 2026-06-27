@@ -702,7 +702,7 @@ function drawPixelIcon(canvasEl,type){
   const emoji=(ITEM_INFO[type]?.icon)||(DIFF_ICONS[type]);
   if(!emoji||!canvasEl)return;
   const sz=canvasEl.width;
-  const src=Math.max(6,Math.round(sz/4)); // 4× pixel scale
+  const src=Math.max(6,Math.round(sz/3)); // 3× pixel scale — plus de pixels, même style que menu
   const px=_buildPixelEmoji(emoji,src,sz);
   const c=canvasEl.getContext('2d');c.clearRect(0,0,sz,sz);
   c.imageSmoothingEnabled=false;c.drawImage(px,0,0);
@@ -1190,7 +1190,7 @@ function drawProjectile(ctx,cx,baseY,scale,type){
   if(scale<0.15)return;
   const info=ITEM_INFO[type];if(!info)return;
   const sz=Math.max(8,Math.round(scale*22));
-  const src=Math.max(4,Math.round(sz/4));
+  const src=Math.max(6,Math.round(sz/3));
   const px=_buildPixelEmoji(info.icon,src,sz);
   // Ombre
   ctx.fillStyle="rgba(0,0,0,0.35)";
@@ -1207,7 +1207,7 @@ function drawDroppedItem(ctx,cx,baseY,scale,type){
   const info=ITEM_INFO[type];
   const icon=info?info.icon:'🫓';
   const sz=Math.max(8,Math.round(scale*18));
-  const src=Math.max(4,Math.round(sz/4));
+  const src=Math.max(6,Math.round(sz/3));
   const px=_buildPixelEmoji(icon,src,sz);
   ctx.fillStyle="rgba(0,0,0,0.35)";
   ctx.beginPath();ctx.ellipse(cx,baseY-1,sz*0.5,sz*0.18,0,0,Math.PI*2);ctx.fill();
@@ -2186,7 +2186,7 @@ function drawSplitHUD(kart,vpY0,vpH,label){
     // Icône pixelisée de l'item dans le HUD split
     const _info=ITEM_INFO[kart.item];
     if(_info){
-      const _sz=16,_src=Math.max(4,Math.round(_sz/4));
+      const _sz=16,_src=Math.max(6,Math.round(_sz/3));
       const _px=_buildPixelEmoji(_info.icon,_src,_sz);
       ctx.imageSmoothingEnabled=false;
       ctx.drawImage(_px,5,vpY0+2,_sz,_sz);
