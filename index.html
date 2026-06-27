@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>PUNJABI SPEED</title>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%234a1330;stop-opacity:1'/%3E%3Cstop offset='100%25' style='stop-color:%236a1f12;stop-opacity:1'/%3E%3C/linearGradient%3E%3ClinearGradient id='fg' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23FFC83D;stop-opacity:1'/%3E%3Cstop offset='100%25' style='stop-color:%23FF8A1E;stop-opacity:1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='6' fill='url(%23bg)'/%3E%3Ctext x='16' y='25' font-family='Courier New,Consolas,monospace' font-size='27' font-weight='900' fill='url(%23fg)' text-anchor='middle'%3EP%3C/text%3E%3C/svg%3E">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#5a1208">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <style>
 * { margin:0; padding:0; box-sizing:border-box; user-select:none; -webkit-user-select:none; }
 html, body { width:100%; height:100%; background:#000; overflow:hidden; font-family:"Courier New",Consolas,monospace; color:#fff; touch-action:none; }
@@ -2479,6 +2483,15 @@ function init(){
   requestAnimationFrame(loop);
 }
 init();
+
+// PWA: Register service worker for offline support and installability
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('service-worker.js').then((reg)=>{
+    console.log('Service Worker registered');
+  }).catch((err)=>{
+    console.log('Service Worker registration failed:', err);
+  });
+}
 </script>
 </body>
 </html>
