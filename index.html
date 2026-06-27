@@ -2044,7 +2044,7 @@ function goToTrackSelect(){
 function showResult(){
   game.state=STATE.RESULT;
   AUDIO.silenceEngine();
-  setTimeout(menuMusicPlay,400); // laisser le moteur se taire avant la musique
+  setTimeout(menuMusicPlay,2000); // laisser les voix de fin se faire entendre avant la musique
   hudEl.classList.remove('active');bridgeHudEl.classList.remove('active');wrongWayEl.classList.remove('active');rearWarnEl.classList.remove('active');document.getElementById('star-fx').classList.remove('active');
   document.getElementById('touch-controls').classList.remove('active');
   const ranking=[...game.karts].sort((a,b)=>{const ap=a.finished?(1e9-a.finishTime):(a.laps+a.u),bp=b.finished?(1e9-b.finishTime):(b.laps+b.u);return bp-ap;});
