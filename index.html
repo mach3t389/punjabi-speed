@@ -631,7 +631,14 @@ function showTip(idx){
   if(!bar)return;
   bar.classList.add('fade');
   setTimeout(()=>{
-    iconEl.textContent=tips[_tipIdx][0];
+    const emoji=tips[_tipIdx][0];
+    const sz=28,src=Math.max(6,Math.round(sz/3));
+    const px=_buildPixelEmoji(emoji,src,sz);
+    iconEl.innerHTML='';
+    const cv=document.createElement('canvas');cv.width=sz;cv.height=sz;
+    cv.style.cssText='width:1.4em;height:1.4em;vertical-align:middle;image-rendering:pixelated;image-rendering:crisp-edges;';
+    const c=cv.getContext('2d');c.imageSmoothingEnabled=false;c.drawImage(px,0,0);
+    iconEl.appendChild(cv);
     textEl.textContent=tips[_tipIdx][1];
     bar.classList.remove('fade');
   },400);
