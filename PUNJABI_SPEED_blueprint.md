@@ -26,8 +26,27 @@
 ### Fichiers à mettre sur la clé USB
 ```
 /
-├── index.html          (106 Ko — jeu complet)
-└── menu-music.mp3      (2.1 Mo — Notize - Density Wave)
+├── index.html                              (120+ Ko — jeu complet)
+├── menu-music.mp3                          (2.1 Mo — Notize - Density Wave)
+└── sfx/Sound effects 1/                    (18 fichiers AAC .m4a, ~500 Ko)
+    ├── Throw object.m4a
+    ├── Boost.m4a
+    ├── Lap.m4a
+    ├── Wrong way.m4a
+    ├── Laughing.m4a
+    ├── First position (All).m4a
+    ├── Hit somebody (Mr Boogerman).m4a
+    ├── Hit somebody 3 (Boogerman).m4a
+    ├── Hit somebody (babypie).m4a
+    ├── Hit somebody 2 (Babypie).m4a
+    ├── hit somebody (Aashi).m4a
+    ├── Banana (Hanuman).m4a
+    ├── Got hit and slipping (babypie).m4a
+    ├── Got it (Hanuman).m4a
+    ├── First place (Hanuman).m4a
+    ├── Podium (Babypie).m4a
+    ├── Last position (Boogerman).m4a
+    └── Last position (Hanuman).m4a
 ```
 
 ---
@@ -290,13 +309,43 @@ score = finished ? (1e9 - finishTime) : (laps + u) * 1000
 - Pause automatique quand l'onglet/app passe en arrière-plan (`visibilitychange`)
 - Reprend à la mise au premier plan
 
-### Effets sonores (Web Audio API — procédural)
+### Effets sonores procéduraux (Web Audio API)
 - Moteur : oscillateur sawtooth, fréquence proportionnelle à la vitesse
 - SFX : `AUDIO.beep(freq, dur, vol, x, y)` avec atténuation par distance :
   ```js
   dmul = 1 / (1 + (d/160)²)   // coupé si dmul < 0.04
   ```
 - Contrôle volume indépendant : `sfxVolume` (slider Settings)
+
+### Voix enregistrées (AAC/MP4 natif)
+**18 fichiers .m4a** dans `sfx/Sound effects 1/` — voix de personnages pour événements de jeu. Aucune conversion ffmpeg requise (Android WebView décode natif).
+
+**Architecture per-character avec fallbacks** (aucun son générique) :
+
+| Événement | Char 0 (Boogerman) | Char 1 (Hanuman) | Char 2 (Babypie) | Char 3 (Aashi) |
+|-----------|---|---|---|---|
+| **Hit** | ✓ 2 clips | → Boogerman | ✓ 2 clips | ✓ 1 clip |
+| **Stun** | → Babypie | ✓ 1 clip | ✓ 1 clip | → Babypie |
+| **Drop** | → Hanuman | ✓ 1 clip | → Hanuman | → Hanuman |
+| **Win (1st)** | → Hanuman | ✓ 1 clip | → Hanuman | → Hanuman |
+| **Podium (2-3)** | → Babypie | → Babypie | ✓ 1 clip | → Babypie |
+| **Last (4th)** | ✓ 1 clip | ✓ 1 clip | → Hanuman | → Hanuman |
+
+**Évènements SFX** :
+- **Throw** : Objet lancé (générique)
+- **Boost** : Activation CHILI (générique)
+- **Lap** : Passage de tour (générique)
+- **Wrong way** : Mauvais sens 2s (générique)
+- **Laugh** : Taunt hit leader (générique)
+- **Hit** : Attaquant touche quelqu'un (voix perso + fallback)
+- **Stun** : Victime se fait toucher (voix perso + fallback, **delay +100ms** pour éviter chevauchement)
+- **Drop** : Dépôt DOSA (voix perso + fallback)
+- **Win/Last/Podium** : Fin de course (voix perso + fallback, **staggered by place**)
+
+**Délais de son** : 
+- Stun décalée de +100ms (laisser passer le son de l'attaquant)
+- Voix fin course échelonnées : 1er=500ms, 2-3ème=550ms, 4ème=600ms (évite chevauchement)
+- `SFX.playChar(prefix, charId, fallbackCharId, vol, delayMs)`
 
 ---
 
@@ -375,20 +424,62 @@ Barre semi-transparente en haut :
 ## 16. Déploiement — Clé USB / WebView Android
 
 ### Prérequis
-- Une app WebView Android capable de charger des fichiers locaux (`file://`)
-- La WebView doit autoriser les médias audio (pour `menu-music.mp3`)
+- Appareil : Radio aftermarket Android (ex. Hyundai Accent 2012) avec WebView intégrée
+- App WebView capable de charger des fichiers locaux (`file://`) — ex. "Web Viewer" ou navigateur Firefox Android
+- Autorisation audios : La WebView doit permettre `<audio>` et `cloneNode()` (standard)
+- Clé USB formatée FAT32 pour compatibilité maximale
+- Câble USB ou adaptateur pour brancher la clé à la radio Android
 
-### Structure de la clé USB
+### Structure complète de la clé USB
 ```
 /
-├── index.html          (jeu complet)
-└── menu-music.mp3      (musique menu)
+├── index.html                              (120+ Ko — jeu complet)
+├── menu-music.mp3                          (2.1 Mo — musique menu)
+└── sfx/Sound effects 1/                    (18 .m4a, ~500 Ko)
+    ├── Throw object.m4a
+    ├── Boost.m4a
+    ├── Lap.m4a
+    ├── Wrong way.m4a
+    ├── Laughing.m4a
+    ├── First position (All).m4a
+    ├── Hit somebody (Mr Boogerman).m4a
+    ├── Hit somebody 3 (Boogerman).m4a
+    ├── Hit somebody (babypie).m4a
+    ├── Hit somebody 2 (Babypie).m4a
+    ├── hit somebody (Aashi).m4a
+    ├── Banana (Hanuman).m4a
+    ├── Got hit and slipping (babypie).m4a
+    ├── Got it (Hanuman).m4a
+    ├── First place (Hanuman).m4a
+    ├── Podium (Babypie).m4a
+    ├── Last position (Boogerman).m4a
+    └── Last position (Hanuman).m4a
 ```
 
-### Résolution
+### Étapes de déploiement
+1. **Formater la clé USB** en FAT32 (Windows : clic-droit > Formater ; Mac : Utilitaire de disque)
+2. **Copier les fichiers** (`index.html`, `menu-music.mp3`, dossier `sfx/`) à la racine
+3. **Brancher la clé USB** à la radio Android
+4. **Ouvrir un navigateur** ou app WebView sur la radio
+5. **Charger le fichier local** : taper dans l'adresse barre :
+   ```
+   file:///mnt/usb0/index.html
+   ```
+   (ou `/sdcard/usb_storage/index.html` selon le fabricant radio)
+6. **Tester** : La page doit charger avec la musique menu + tous les SFX AAC
+
+### Variantes d'adresse (selon la radio)
+- **Hyundai/Kia aftermarket** : `file:///mnt/usb0/index.html`
+- **Sony/Alpine** : `file:///sdcard/usb/index.html`
+- **Android générique** : `file:///storage/emulated/0/DCIM/index.html` (si copié vers stockage interne)
+
+> **Conseil** : Demander au support fabricant le chemin exact pour monter USB, ou essayer les 3 variantes.
+
+### Résolution et layout
 - Le jeu s'adapte à tout ratio 16:9 via CSS (`max-width:177.78vh`)
 - Cible principale : **1280×720**
-- Boutons tactiles positionnés pour usage au volant (bas d'écran, larges)
+- Fallback : **1024×600** (écrans plus petits)
+- Boutons tactiles positionnés pour usage au volant (bas d'écran, larges ≥80×80px)
 
 ---
 
