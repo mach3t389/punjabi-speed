@@ -1794,6 +1794,7 @@ function menuRows(){
 // Applique la surbrillance de focus sur la ligne/bouton courant
 function renderMenuFocus(){
   document.querySelectorAll('.nav-focus,.nav-btn-focus').forEach(e=>e.classList.remove('nav-focus','nav-btn-focus'));
+  if(!INPUT._gpConnected)return; // pas de manette = pas d'indicateur de sélection
   const rows=menuRows(); if(!rows.length)return;
   game._navRow=clamp(game._navRow,0,rows.length-1);
   const row=rows[game._navRow];
