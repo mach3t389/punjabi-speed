@@ -162,6 +162,7 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; font-fam
 .pad-row-focus{outline:2px solid #F4D03F;outline-offset:4px;border-radius:10px;}
 .nav-focus{outline:3px solid #fff;outline-offset:5px;border-radius:12px;box-shadow:0 0 0 6px rgba(0,200,255,.25);animation:navpulse 1s ease-in-out infinite;}
 .nav-btn-focus{outline:3px solid #fff;outline-offset:3px;filter:brightness(1.1);box-shadow:0 0 0 5px rgba(0,200,255,.3),0 0 18px rgba(0,200,255,.6);animation:navpulse 1s ease-in-out infinite;}
+.menu-pixel-icon{image-rendering:pixelated;image-rendering:crisp-edges;vertical-align:middle;display:inline-block;}
 @keyframes navpulse{50%{box-shadow:0 0 0 8px rgba(0,200,255,.12),0 0 22px rgba(0,200,255,.45);}}
 .lap-select-row{display:flex;align-items:center;justify-content:center;gap:12px;margin:3px 0 5px;}
 .lap-select-label{font-size:clamp(11px,1.8vw,14px);font-weight:bold;letter-spacing:2px;color:rgba(255,255,255,.7);}
@@ -223,13 +224,13 @@ input[type=range].pk-slider::-moz-range-thumb{width:20px;height:20px;border-radi
     <div class="subtitle">HOCHELAGA · KITCHENER · ÎLE NOTRE-DAME</div>
     <div class="title-nav">
       <div class="player-select-row" id="player-select-row">
-        <button class="player-btn active" id="btn-1p-title" data-players="1" data-i18n="players_1">👤 1 JOUEUR</button>
-        <button class="player-btn" id="btn-2p-title" data-players="2" data-i18n="players_2">👥 2 JOUEURS</button>
+        <button class="player-btn active" id="btn-1p-title" data-players="1" data-i18n="players_1"><canvas class="menu-pixel-icon" data-emoji="👤" width="20" height="20"></canvas> 1 JOUEUR</button>
+        <button class="player-btn" id="btn-2p-title" data-players="2" data-i18n="players_2"><canvas class="menu-pixel-icon" data-emoji="👥" width="20" height="20"></canvas> 2 JOUEURS</button>
       </div>
-      <button class="nav-btn nav-play" id="title-play" data-i18n="press_play">▶ JOUER</button>
+      <button class="nav-btn nav-play" id="title-play" data-i18n="press_play"><canvas class="menu-pixel-icon" data-emoji="▶" width="18" height="18"></canvas> JOUER</button>
       <div class="title-nav-secondary">
-        <button class="nav-btn" id="title-stats" data-i18n="stats_btn">📊 STATISTIQUES</button>
-        <button class="nav-btn" id="title-settings" data-i18n="settings_btn">⚙ PARAMÈTRES</button>
+        <button class="nav-btn" id="title-stats" data-i18n="stats_btn"><canvas class="menu-pixel-icon" data-emoji="📊" width="18" height="18"></canvas> STATISTIQUES</button>
+        <button class="nav-btn" id="title-settings" data-i18n="settings_btn"><canvas class="menu-pixel-icon" data-emoji="⚙" width="18" height="18"></canvas> PARAMÈTRES</button>
       </div>
     </div>
     <div class="hint" data-i18n="hint">Menus : ← → choisir · Entrée valider<br>Course : ← → diriger · ↑ gaz · ↓ frein · Shift item</div>
@@ -2126,6 +2127,13 @@ function pauseToMenu(){
 
 function init(){
   setupTrack(TRACKS[0]);
+  // Icônes pixelisées des boutons du menu
+  document.querySelectorAll('.menu-pixel-icon').forEach(cv=>{
+    const emoji=cv.dataset.emoji;if(!emoji)return;
+    const sz=cv.width,src=Math.max(4,Math.round(sz/4));
+    const px=_buildPixelEmoji(emoji,src,sz);
+    const c=cv.getContext('2d');c.imageSmoothingEnabled=false;c.drawImage(px,0,0);
+  });
   document.getElementById('title-play').addEventListener('click',()=>{if(game.state===STATE.TITLE){AUDIO.init();AUDIO.resume();goToSelect();}});
   document.querySelectorAll('.player-btn').forEach(b=>{
     b.addEventListener('click',()=>{
