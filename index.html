@@ -17,19 +17,23 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; font-fam
 #screen-track { overflow-y:auto; padding:12px 0 20px; }
 #screen-diff { background:linear-gradient(180deg,#1a1228 0%,#0d1020 100%); overflow-y:auto; justify-content:flex-start; padding:0; }
 #screen-diff .params-inner { margin:auto; width:100%; display:flex; flex-direction:column; align-items:center; padding:12px 16px 16px; }
-#screen-title { background:linear-gradient(180deg,#0b1f3a 0%,#123a5e 55%,#1d6e4f 100%); }
-.logo { font-size:clamp(34px,9vw,92px); font-weight:900; letter-spacing:4px; line-height:0.95; text-shadow:4px 4px 0 #000,8px 8px 0 rgba(0,0,0,.35); }
-.logo .l1{color:#E24B4A;} .logo .l2{color:#F4D03F;}
+#screen-title { background:
+  radial-gradient(ellipse 85% 60% at 50% 34%, rgba(255,140,40,.32), rgba(255,140,40,0) 68%),
+  linear-gradient(180deg,#2a0a20 0%,#4a1330 42%,#6a1f12 100%); }
+.logo { font-size:clamp(34px,9vw,92px); font-weight:900; letter-spacing:4px; line-height:0.95; transform:skewX(-7deg); text-shadow:3px 3px 0 #7a1540,6px 6px 0 #000,10px 10px 0 rgba(0,0,0,.3); }
+.logo .l1{color:#FF8A1E;} .logo .l2{color:#FFC83D;}
+/* Bande à damier façon course */
+.checker-strip{height:13px;width:clamp(200px,40vw,340px);margin:10px auto 0;background:repeating-conic-gradient(#1a1a1a 0% 25%,#fff 0% 50%);background-size:13px 13px;border-radius:3px;box-shadow:0 0 0 2px rgba(0,0,0,.3);opacity:.92;}
 .subtitle{margin-top:6px;font-size:clamp(9px,1.4vw,12px);color:#6a9bbf;letter-spacing:2px;opacity:.65;}
 .prompt{margin-top:34px;font-size:clamp(14px,3vw,26px);animation:blink 1s steps(2,start) infinite;}
 @keyframes blink{50%{opacity:0}}
 .hint{margin-top:26px;font-size:clamp(10px,1.8vw,14px);color:#88a;line-height:1.7;}
 
-#screen-select{background:linear-gradient(180deg,#10243f 0%,#0b1727 100%);}
-.select-title{font-size:clamp(16px,3.5vw,30px);letter-spacing:3px;margin-bottom:14px;color:#F4D03F;}
+#screen-select{background:linear-gradient(180deg,#2a0a20 0%,#1a0814 100%);}
+.select-title{font-size:clamp(16px,3.5vw,30px);letter-spacing:3px;margin-bottom:14px;color:#FF8A1E;text-shadow:2px 2px 0 rgba(0,0,0,.45);}
 .char-row{display:flex;gap:clamp(6px,1.5vw,20px);flex-wrap:wrap;justify-content:center;}
 .char-card{width:clamp(95px,18vw,155px);background:rgba(255,255,255,.06);border:3px solid rgba(255,255,255,.18);border-radius:12px;padding:10px 8px;cursor:pointer;transition:transform .12s,border-color .12s,background .12s;}
-.char-card:hover,.char-card.sel{transform:translateY(-6px) scale(1.04);border-color:#F4D03F;background:rgba(255,255,255,.12);}
+.char-card:hover,.char-card.sel{transform:translateY(-6px) scale(1.04);border-color:#FF8A1E;background:rgba(255,138,30,.12);}
 .char-card canvas{width:72px;height:72px;image-rendering:pixelated;margin:0 auto 6px;display:block;}
 .char-card .cname{font-size:clamp(11px,2vw,15px);font-weight:bold;letter-spacing:1px;}
 .char-stats{margin-top:6px;font-size:10px;text-align:left;color:#cfe;line-height:1.5;}
@@ -45,8 +49,8 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; font-fam
 .track-card .tloc{font-size:clamp(10px,1.6vw,13px);color:#9fd0ff;letter-spacing:1px;}
 .track-card .tdesc{margin-top:6px;font-size:clamp(9px,1.4vw,11px);color:#aaa;line-height:1.4;}
 
-.go-btn{margin-top:18px;padding:11px 34px;font-family:inherit;font-size:clamp(14px,2.8vw,20px);font-weight:bold;letter-spacing:2px;color:#062;background:#F4D03F;border:none;border-radius:30px;cursor:pointer;box-shadow:0 5px 0 #b9952a;}
-.go-btn:active{transform:translateY(4px);box-shadow:0 1px 0 #b9952a;}
+.go-btn{margin-top:18px;padding:11px 34px;font-family:inherit;font-size:clamp(14px,2.8vw,20px);font-weight:bold;letter-spacing:2px;color:#5a1208;background:linear-gradient(180deg,#FFC83D 0%,#FF8A1E 100%);border:none;border-radius:30px;cursor:pointer;box-shadow:0 5px 0 #9a4a08;}
+.go-btn:active{transform:translateY(4px);box-shadow:0 1px 0 #9a4a08;}
 
 #hud{position:absolute;top:0;left:0;right:0;display:none;padding:6px 12px;background:rgba(0,0,0,.55);font-weight:bold;letter-spacing:1px;z-index:8;pointer-events:none;}
 #hud.active{display:flex;align-items:center;gap:14px;}
@@ -214,6 +218,7 @@ input[type=range].pk-slider::-moz-range-thumb{width:20px;height:20px;border-radi
 
   <div id="screen-title" class="screen active">
     <div class="logo"><span class="l1">PUNJABI</span> <span class="l2">SPEED</span></div>
+    <div class="checker-strip"></div>
     <div class="title-tagline">MOREL &times; NAGPAL RACING</div>
     <div class="subtitle">HOCHELAGA · KITCHENER · ÎLE NOTRE-DAME</div>
     <div class="title-nav">
