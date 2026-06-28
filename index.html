@@ -1486,9 +1486,11 @@ function updatePlayer(k,dt){
 
   const iA=k.isP2?INPUT.p2accel:INPUT.accel, iB=k.isP2?INPUT.p2brake:INPUT.brake;
   const accelMag=k.isP2?(iA?1:0):INPUT.accelAxis; // gaz proportionnel via RT
+  const reverseCap=-st.topSpeed*0.40; // marche arrière ≈ 40% de la vitesse max
   if(accelMag>0.05){const cap=st.topSpeed*Math.min(speedMult,boostMult*1.2);k.speed=Math.min(k.speed+st.accel*speedMult*accelMag*dt,cap);}
-  else if(iB)k.speed=Math.max(0,k.speed-.15*dt);
-  else k.speed=Math.max(0,k.speed-(onTrack?.03:.08)*dt);
+  else if(iB)k.speed=Math.max(reverseCap,k.speed-.15*dt); // frein → s'arrête puis recule
+  else if(k.speed>0)k.speed=Math.max(0,k.speed-(onTrack?.03:.08)*dt);
+  else k.speed=Math.min(0,k.speed+.05*dt); // friction qui ramène la marche arrière à l'arrêt
   k.x+=Math.cos(k.angle)*k.speed*dt*.5;
   k.y+=Math.sin(k.angle)*k.speed*dt*.5;
   k.onTrack=onTrack;
@@ -1819,7 +1821,7 @@ function drawHUD(){
   const p=game.player;
   hLap.textContent=T('lap_label')+" "+(p.finished?currentTrack.totalLaps:clamp(p.laps+1,1,currentTrack.totalLaps))+"/"+currentTrack.totalLaps;
   hTime.textContent=formatTime(game.raceTime);
-  hSpeed.textContent=Math.round((p.speed/p.char.stats.topSpeed)*180)+" km/h";
+  hSpeed.textContent=Math.round(Math.abs(p.speed/p.char.stats.topSpeed)*180)+" km/h";
   hPos.textContent=ordinal(computePlace(p));
   // Item tenu — boîte en bas à gauche (pixel art)
   const _icC=document.getElementById('ic-canvas');
