@@ -2339,9 +2339,11 @@ function startRace(){
   showScreen(null);
   hudEl.classList.remove('active');
   if(game.splitScreen){
+    hudEl.style.display='none'; // forcer caché même si classe 'active' résiduelle
     document.getElementById('sp-hud1').classList.add('active');
     document.getElementById('sp-hud2').classList.add('active');
   } else {
+    hudEl.style.display=''; // laisser le CSS contrôler
     hudEl.classList.add('active');
   }
   // Vérification directe au démarrage (l'event gamepadconnected peut arriver avant le loop)
@@ -2457,7 +2459,7 @@ function drawSplitHUD(kart,vpY0,vpH,label){
 }
 function renderScene(){
   if(game.splitScreen&&game.p2){
-    const VPH=175,VP2Y=RENDER_H-VPH;
+    const VPH=175,VP2Y=VPH;
     // P1 — haut
     const elev1=getTrackElevation(game.player.u,currentTrack);
     dynamicFocalH=CAMERA.focal*(CAMERA.height+elev1);
