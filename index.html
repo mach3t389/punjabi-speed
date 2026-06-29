@@ -1121,10 +1121,10 @@ const INPUT={
       // D-pad haut/bas — fonctionne pour NES (axes[1]) et Xbox (btn12/13)
       const dPadUp  =(gp.axes[1]!=null&&gp.axes[1]<-0.45)||btn(12);
       const dPadDown=(gp.axes[1]!=null&&gp.axes[1]> 0.45)||btn(13);
-      // Gaz : A physique NES=btn(1), RT Xbox, D-pad haut
-      const dAccel=rtVal>0.15||btn(1)||dPadUp;
-      // Frein : B physique NES=btn(0), LT Xbox, D-pad bas
-      const dBrake=ltVal>0.15||btn(0)||dPadDown;
+      // Gaz : A physique NES=btn(1), RT Xbox
+      const dAccel=rtVal>0.15||btn(1);
+      // Frein : B physique NES=btn(0), LT Xbox
+      const dBrake=ltVal>0.15||btn(0);
       // Item : X/Y/LB/RB uniquement (A/B réservés gaz/frein)
       const dUse=btn(2)||btn(3)||btn(4)||btn(5);
       // Start(9) / Options(9) pour pause — détection front montant
@@ -1135,11 +1135,11 @@ const INPUT={
       if(dUse&&!this._gpPrev.use&&game.state===STATE.RACING)useItem(game.player);
       this._gpPrev.start=dStart;
       this._gpPrev.use=dUse;
-      // Axis brut pour steering analogique (deadzone 0.12)
-      const rawAxis=Math.abs(gp.axes[0])>0.12 ? gp.axes[0] : 0;
+      // Axis brut pour steering analogique — axes[0] si dispo, sinon D-pad binaire (btn14/15)
+      const rawAxis=Math.abs(gp.axes[0])>0.12 ? gp.axes[0] : (dLeft?-1:dRight?1:0);
       // Gaz analogique via RT (axes[7] ou buttons[7].value)
-      const accelAxis=Math.min(Math.max(rtVal, btn(1)?1:0, dPadUp?1:0), 1);
-      const brakeAxis=Math.min(Math.max(ltVal, btn(0)?1:0, dPadDown?1:0), 1);
+      const accelAxis=Math.min(Math.max(rtVal, btn(1)?1:0), 1);
+      const brakeAxis=Math.min(Math.max(ltVal, btn(0)?1:0), 1);
       this.gamepad={left:dLeft,right:dRight,accel:dAccel,brake:dBrake,use:dUse,
                     steerAxis:rawAxis, accelAxis:Math.min(accelAxis,1), brakeAxis:Math.min(brakeAxis,1)};
     } else {
