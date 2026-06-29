@@ -367,6 +367,13 @@ input[type=range].pk-slider::-moz-range-thumb{width:20px;height:20px;border-radi
           <span class="val-display" id="set-sfx-vol-val">80%</span>
         </div>
       </div>
+      <div class="settings-row">
+        <label data-i18n="set_sfx_mode">TYPE DE SONS</label>
+        <div class="settings-row-inner" style="gap:8px">
+          <button class="opt-btn sel" id="set-sfx-recorded" style="flex:1;height:34px;font-size:clamp(10px,1.6vw,13px)">🎤 VOIX</button>
+          <button class="opt-btn" id="set-sfx-synth" style="flex:1;height:34px;font-size:clamp(10px,1.6vw,13px)">🔊 SYNTHÉ</button>
+        </div>
+      </div>
     </div>
     <div class="settings-controls-title" data-i18n="ctrl_title">CONTRÔLES</div>
     <div class="settings-controls-grid">
@@ -1086,6 +1093,7 @@ const SFX={
   // joue une clé ; retourne true si un clip existe et a démarré
   play(key,vol){
     if(typeof AUDIO!=='undefined'&&!AUDIO.enabled)return false;
+    if(useSynthSFX)return false;
     const arr=this.pool[key]; if(!arr||!arr.length)return false;
     const base=arr[(Math.random()*arr.length)|0];
     const a=base.cloneNode(true); // clone = lectures superposables
@@ -2281,6 +2289,7 @@ function goToStats(){game.state=STATE.STATS;renderStats();showScreen('screen-sta
 function goToSettings(){game.state=STATE.SETTINGS;showScreen('screen-settings');updateGamepadUI();}
 
 let sfxVolume=0.80; // volume effets sonores (0–1)
+let useSynthSFX=false; // true = sons synthétisés, false = voix enregistrées
 function initSettings(){
   const mvSlider=document.getElementById('set-music-vol');
   const mvVal=document.getElementById('set-music-vol-val');
@@ -2296,6 +2305,11 @@ function initSettings(){
     sfxVolume=+sfxSlider.value/100;
     sfxVal.textContent=sfxSlider.value+'%';
   });
+  const btnRec=document.getElementById('set-sfx-recorded');
+  const btnSynth=document.getElementById('set-sfx-synth');
+  function _sfxModeUpdate(){btnRec.classList.toggle('sel',!useSynthSFX);btnSynth.classList.toggle('sel',useSynthSFX);}
+  btnRec.addEventListener('click',()=>{useSynthSFX=false;_sfxModeUpdate();});
+  btnSynth.addEventListener('click',()=>{useSynthSFX=true;_sfxModeUpdate();});
   document.getElementById('settings-back').addEventListener('click',()=>{game.state=STATE.TITLE;menuMusicPlay();showScreen('screen-title');});
 }
 
