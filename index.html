@@ -1614,7 +1614,7 @@ function useItem(k, backward){
       game.projectiles.push({x:px,y:py,angle:throwAngle+da,speed:info.speed,type:'KURKURE',ownerId:k.char.id,life:info.life,bounceCount:0});
     }
     AUDIO.beep(900,.05,.14,k.x,k.y);setTimeout(()=>AUDIO.beep(1100,.05,.12,k.x,k.y),40);setTimeout(()=>AUDIO.beep(1300,.08,.14,k.x,k.y),90);
-    if(isHuman(k)){SFX.play('throw',.8);if(Math.random()<0.65)SFX.playChar('throw',k.char.id,'throw_voice',.75,150);}
+    if(isHuman(k)&&Math.random()<0.65)SFX.playChar('throw',k.char.id,'throw_voice',.75,150);
     return;
   }
   if(type==='DOSA'){
