@@ -89,6 +89,18 @@ html, body { width:100%; height:100%; background:#000; overflow:hidden; font-fam
 #h-item{font-size:clamp(13px,2.4vw,18px);background:rgba(255,255,255,.12);border-radius:8px;padding:2px 8px;min-width:60px;text-align:center;}
 #hud.flash{background:rgba(244,208,63,.75);color:#000;}
 #hud.stun {background:rgba(220,50,50,.70);color:#fff;}
+/* HUDs split-screen */
+.sp-hud{position:absolute;left:0;right:0;display:none;padding:3px 10px;background:rgba(0,0,0,.60);font-weight:bold;letter-spacing:1px;z-index:8;pointer-events:none;font-size:clamp(10px,2vw,15px);}
+.sp-hud.active{display:flex;align-items:center;gap:10px;}
+#sp-hud1{top:0;}
+#sp-hud2{top:51.4%;}
+.sp-tag{border-radius:5px;padding:1px 6px;font-size:clamp(9px,1.6vw,13px);font-weight:900;letter-spacing:2px;}
+#sp-hud1 .sp-tag{background:#2255cc;color:#fff;}
+#sp-hud2 .sp-tag{background:#cc4422;color:#fff;}
+.sp-name{color:#F4D03F;}
+.sp-lap{color:#F4D03F;}
+.sp-pos{color:#fff;margin-left:auto;}
+.sp-item{color:#ddd;background:rgba(255,255,255,.12);border-radius:5px;padding:1px 6px;}
 
 #bridge-hud{position:absolute;top:44px;left:50%;transform:translateX(-50%);display:none;background:rgba(120,140,180,.85);color:#fff;font-size:clamp(10px,2vw,14px);font-weight:bold;letter-spacing:2px;padding:3px 12px;border-radius:20px;z-index:8;pointer-events:none;}
 #bridge-hud.active{display:block;}
@@ -398,6 +410,12 @@ input[type=range].pk-slider::-moz-range-thumb{width:20px;height:20px;border-radi
     <div class="seg" id="h-speed">0 km/h</div>
     <div class="seg" id="h-item" style="display:none"><canvas id="hud-ic" width="32" height="32" style="width:22px;height:22px;image-rendering:pixelated;image-rendering:crisp-edges;vertical-align:middle;"></canvas></div>
     <div class="seg" id="h-pos" style="flex:0 0 70px">1st</div>
+  </div>
+  <div id="sp-hud1" class="sp-hud">
+    <span class="sp-tag">J1</span><span class="sp-name" id="sp1-name"></span><span class="sp-lap" id="sp1-lap"></span><span class="sp-item" id="sp1-item" style="display:none"></span><span class="sp-pos" id="sp1-pos"></span>
+  </div>
+  <div id="sp-hud2" class="sp-hud">
+    <span class="sp-tag">J2</span><span class="sp-name" id="sp2-name"></span><span class="sp-lap" id="sp2-lap"></span><span class="sp-item" id="sp2-item" style="display:none"></span><span class="sp-pos" id="sp2-pos"></span>
   </div>
   <div id="bridge-hud">🌉 <span data-i18n="bridge">PONT</span></div>
   <div id="item-notif"></div>
@@ -1827,7 +1845,21 @@ function formatTime(ms){const m=Math.floor(ms/60000),s=Math.floor((ms%60000)/100
 function ordinal(n){return T('ordinals')[Math.min(n-1,3)]||n;}
 function computePlace(target){let place=1;const tp=target.finished?(1e9-target.finishTime):(target.laps+target.u)*1000;for(const k of game.karts){if(k===target)continue;const kp=k.finished?(1e9-k.finishTime):(k.laps+k.u)*1000;if(kp>tp)place++;}return place;}
 
+function _spHudKart(k,nameEl,lapEl,itemEl,posEl){
+  nameEl.textContent=k.char.name;
+  lapEl.textContent=' · '+T('lap_label')+' '+(k.finished?currentTrack.totalLaps:clamp(k.laps+1,1,currentTrack.totalLaps))+'/'+currentTrack.totalLaps;
+  posEl.textContent=ordinal(computePlace(k));
+  const itm=k.item||(k.starTime>0?'KURKURE':null)||(k.boostTime>0?'CHILI':null);
+  if(itm){itemEl.style.display='';itemEl.textContent=ITEM_INFO[itm].label;}
+  else{itemEl.style.display='none';}
+}
 function drawHUD(){
+  if(game.splitScreen&&game.p2){
+    _spHudKart(game.player,document.getElementById('sp1-name'),document.getElementById('sp1-lap'),document.getElementById('sp1-item'),document.getElementById('sp1-pos'));
+    _spHudKart(game.p2,document.getElementById('sp2-name'),document.getElementById('sp2-lap'),document.getElementById('sp2-item'),document.getElementById('sp2-pos'));
+    hTime.textContent=formatTime(game.raceTime);
+    return;
+  }
   const p=game.player;
   hLap.textContent=T('lap_label')+" "+(p.finished?currentTrack.totalLaps:clamp(p.laps+1,1,currentTrack.totalLaps))+"/"+currentTrack.totalLaps;
   hTime.textContent=formatTime(game.raceTime);
@@ -2174,7 +2206,7 @@ function showResult(){
   game.state=STATE.RESULT;
   AUDIO.silenceEngine();
   _menuMusicTimer=setTimeout(menuMusicPlay,2000); // laisser les voix de fin se faire entendre avant la musique
-  hudEl.classList.remove('active');bridgeHudEl.classList.remove('active');wrongWayEl.classList.remove('active');rearWarnEl.classList.remove('active');document.getElementById('star-fx').classList.remove('active');
+  hudEl.classList.remove('active');document.getElementById('sp-hud1').classList.remove('active');document.getElementById('sp-hud2').classList.remove('active');bridgeHudEl.classList.remove('active');wrongWayEl.classList.remove('active');rearWarnEl.classList.remove('active');document.getElementById('star-fx').classList.remove('active');
   document.getElementById('touch-controls').classList.remove('active');
   const ranking=[...game.karts].sort((a,b)=>{const ap=a.finished?(1e9-a.finishTime):(a.laps+a.u),bp=b.finished?(1e9-b.finishTime):(b.laps+b.u);return bp-ap;});
   const place=ranking.indexOf(game.player)+1;
@@ -2298,7 +2330,12 @@ function startRace(){
   });
   initItemBoxes();
   showScreen(null);
-  if(!game.splitScreen)hudEl.classList.add('active');
+  if(game.splitScreen){
+    document.getElementById('sp-hud1').classList.add('active');
+    document.getElementById('sp-hud2').classList.add('active');
+  } else {
+    hudEl.classList.add('active');
+  }
   // Vérification directe au démarrage (l'event gamepadconnected peut arriver avant le loop)
   const _pads=navigator.getGamepads?navigator.getGamepads():[];
   INPUT._gpConnected=Array.from(_pads).some(p=>p&&p.connected);
@@ -2502,7 +2539,7 @@ function pauseToMenu(){
   game.state=STATE.TITLE;
   document.getElementById('screen-pause').classList.remove('active');
   AUDIO.silenceEngine();
-  hudEl.classList.remove('active');bridgeHudEl.classList.remove('active');wrongWayEl.classList.remove('active');rearWarnEl.classList.remove('active');document.getElementById('star-fx').classList.remove('active');
+  hudEl.classList.remove('active');document.getElementById('sp-hud1').classList.remove('active');document.getElementById('sp-hud2').classList.remove('active');bridgeHudEl.classList.remove('active');wrongWayEl.classList.remove('active');rearWarnEl.classList.remove('active');document.getElementById('star-fx').classList.remove('active');
   document.getElementById('touch-controls').classList.remove('active');
   showScreen('screen-title');
 }
