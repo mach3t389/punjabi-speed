@@ -1121,12 +1121,12 @@ const INPUT={
       // D-pad haut/bas — fonctionne pour NES (axes[1]) et Xbox (btn12/13)
       const dPadUp  =(gp.axes[1]!=null&&gp.axes[1]<-0.45)||btn(12);
       const dPadDown=(gp.axes[1]!=null&&gp.axes[1]> 0.45)||btn(13);
-      // Gaz : RT uniquement + D-pad haut (pas de bouton face pour éviter confusion NES/Xbox)
-      const dAccel=rtVal>0.15||dPadUp;
-      // Frein : LT uniquement + D-pad bas
-      const dBrake=ltVal>0.15||dPadDown;
-      // Item : n'importe quel bouton face (A/B/X/Y — peu importe disposition NES ou Xbox)
-      const dUse=btn(0)||btn(1)||btn(2)||btn(3)||btn(4)||btn(5);
+      // Gaz : A physique NES=btn(1), RT Xbox, D-pad haut
+      const dAccel=rtVal>0.15||btn(1)||dPadUp;
+      // Frein : B physique NES=btn(0), LT Xbox, D-pad bas
+      const dBrake=ltVal>0.15||btn(0)||dPadDown;
+      // Item : X/Y/LB/RB uniquement (A/B réservés gaz/frein)
+      const dUse=btn(2)||btn(3)||btn(4)||btn(5);
       // Start(9) / Options(9) pour pause — détection front montant
       const dStart=btn(9)||btn(8);
       if(dStart&&!this._gpPrev.start){
@@ -1138,8 +1138,8 @@ const INPUT={
       // Axis brut pour steering analogique (deadzone 0.12)
       const rawAxis=Math.abs(gp.axes[0])>0.12 ? gp.axes[0] : 0;
       // Gaz analogique via RT (axes[7] ou buttons[7].value)
-      const accelAxis=Math.min(Math.max(rtVal, dPadUp?1:0), 1);
-      const brakeAxis=Math.min(Math.max(ltVal, dPadDown?1:0), 1);
+      const accelAxis=Math.min(Math.max(rtVal, btn(1)?1:0, dPadUp?1:0), 1);
+      const brakeAxis=Math.min(Math.max(ltVal, btn(0)?1:0, dPadDown?1:0), 1);
       this.gamepad={left:dLeft,right:dRight,accel:dAccel,brake:dBrake,use:dUse,
                     steerAxis:rawAxis, accelAxis:Math.min(accelAxis,1), brakeAxis:Math.min(brakeAxis,1)};
     } else {
@@ -1787,8 +1787,8 @@ const rearWarnEl=document.getElementById('rear-warn');
 let _rearWarnBeepT=0;
 
 function checkRearDanger(player){
-  // Détecte projectiles et karts qui approchent par derrière
-  const REAR_DIST=90, REAR_ANGLE=Math.PI*0.65;
+  // Détecte uniquement les projectiles ennemis qui approchent par derrière
+  const REAR_DIST=80, REAR_ANGLE=Math.PI*0.38; // cône étroit de ~137° total
   let danger=false;
   const behindAngle=player.angle+Math.PI;
   for(const p of game.projectiles){
@@ -1798,18 +1798,9 @@ function checkRearDanger(player){
     const a=Math.atan2(dy,dx);
     if(Math.abs(((a-behindAngle)+Math.PI*3)%(Math.PI*2)-Math.PI)<REAR_ANGLE){danger=true;break;}
   }
-  if(!danger){
-    for(const k of game.karts){
-      if(k===player||k.stunTime>0)continue;
-      const dx=k.x-player.x,dy=k.y-player.y,d=Math.hypot(dx,dy);
-      if(d>55||d<8)continue; // trop loin ou trop proche (déjà à côté)
-      const a=Math.atan2(dy,dx);
-      if(Math.abs(((a-behindAngle)+Math.PI*3)%(Math.PI*2)-Math.PI)<REAR_ANGLE&&k.speed>player.speed*0.6){danger=true;break;}
-    }
-  }
   rearWarnEl.classList.toggle('active',danger);
-  if(danger&&game.raceTime-_rearWarnBeepT>40){
-    AUDIO.beep(880,.05,.12);AUDIO.beep(660,.05,.10);
+  if(danger&&game.raceTime-_rearWarnBeepT>900){
+    AUDIO.beep(600,.03,.22);
     _rearWarnBeepT=game.raceTime;
   }
 }
@@ -2022,8 +2013,8 @@ function pollMenuGamepad(t){
   const ax=gp.axes, B=i=>gp.buttons[i]&&gp.buttons[i].pressed;
   const left =ax[0]<-.5||B(14), right=ax[0]>.5||B(15);
   const up   =ax[1]<-.5||B(12), down =ax[1]>.5||B(13);
-  const okRaw  = B(0)||(gp.buttons[7]&&gp.buttons[7].value>.5)||B(9); // A / RT / Start
-  const backRaw= B(1)||(gp.buttons[6]&&gp.buttons[6].value>.5);       // B / LT
+  const okRaw  = B(1)||(gp.buttons[7]&&gp.buttons[7].value>.5)||B(9); // A physique NES=btn(1) / RT / Start
+  const backRaw= B(0)||(gp.buttons[6]&&gp.buttons[6].value>.5);       // B physique NES=btn(0) / LT
   // Directions : répétition limitée (maintien = défilement)
   if((left||right||up||down)&&t-game._padNav>170){
     if(up)menuNav('up'); else if(down)menuNav('down');
