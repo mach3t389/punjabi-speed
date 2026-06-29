@@ -387,14 +387,15 @@ input[type=range].pk-slider::-moz-range-thumb{width:20px;height:20px;border-radi
         <div class="ctrl-row"><span class="ctrl-key">Entrée</span><span class="ctrl-desc" data-i18n="ctrl_confirm">Valider menu</span></div>
       </div>
       <div class="ctrl-block" id="ctrl-gamepad-block">
-        <div class="ctrl-block-label">🎮 MANETTE</div>
-        <div class="ctrl-row"><span class="ctrl-key" style="font-size:9px;opacity:.55">NES/générique</span></div>
+        <div class="ctrl-block-label">🎮 MANETTE NES</div>
         <div class="ctrl-row"><span class="ctrl-key">← →</span><span class="ctrl-desc" data-i18n="ctrl_steer">Diriger</span></div>
         <div class="ctrl-row"><span class="ctrl-key">A</span><span class="ctrl-desc" data-i18n="ctrl_gas">Accélérer</span></div>
         <div class="ctrl-row"><span class="ctrl-key">B</span><span class="ctrl-desc" data-i18n="ctrl_brake">Freiner</span></div>
         <div class="ctrl-row"><span class="ctrl-key">X</span><span class="ctrl-desc" data-i18n="ctrl_item">Utiliser item</span></div>
         <div class="ctrl-row"><span class="ctrl-key">↓ + X</span><span class="ctrl-desc" data-i18n="ctrl_item_back">Lancer derrière</span></div>
-        <div class="ctrl-row" style="margin-top:6px"><span class="ctrl-key" style="font-size:9px;opacity:.55">Xbox</span></div>
+      </div>
+      <div class="ctrl-block">
+        <div class="ctrl-block-label">🎮 MANETTE XBOX</div>
         <div class="ctrl-row"><span class="ctrl-key">L-stick</span><span class="ctrl-desc" data-i18n="ctrl_steer">Diriger</span></div>
         <div class="ctrl-row"><span class="ctrl-key">RT</span><span class="ctrl-desc" data-i18n="ctrl_gas">Accélérer</span></div>
         <div class="ctrl-row"><span class="ctrl-key">LT</span><span class="ctrl-desc" data-i18n="ctrl_brake">Freiner</span></div>
@@ -1219,7 +1220,7 @@ function updateGamepadUI(){
   const pads=navigator.getGamepads?navigator.getGamepads():null;
   let gp=null; if(pads){for(let i=0;i<pads.length;i++){if(pads[i]&&pads[i].connected){gp=pads[i];break;}}}
   const label=block.querySelector('.ctrl-block-label');
-  if(label)label.textContent='🎮 MANETTE'+(gp?' ('+gp.id.slice(0,16)+')':'');
+  if(label)label.textContent='🎮 MANETTE NES'+(gp?' ('+gp.id.slice(0,16)+')':'');
 }
 
 window.addEventListener('gamepadconnected',()=>{
