@@ -1028,7 +1028,12 @@ const AUDIO={
 const SFX_BASE='sfx/Sound effects 1/';
 const SFX_FILES={
   // génériques (n'importe quel humain)
-  throw:    ['Throw object.m4a'],
+  throw:       ['Throw object.m4a'],
+  // Voix au lancer par perso — fallback générique inclut Aashi pour tous les persos
+  throw_voice: ['hit somebody (Aashi).m4a','Laughing.m4a'],
+  throw_0:     ['Hit somebody (Mr Boogerman).m4a','Hit somebody 3 (Boogerman).m4a'],
+  throw_2:     ['Hit somebody (babypie).m4a','Hit somebody 2 (Babypie).m4a'],
+  throw_3:     ['hit somebody (Aashi).m4a'],
   boost:    ['Boost.m4a'],
   lap:      ['Lap.m4a'],
   wrongway: ['Wrong way.m4a'],
@@ -1109,12 +1114,19 @@ const INPUT={
       // Directions : stick gauche OU D-pad (axes ou boutons)
       const dLeft =gp.axes[0]<-0.25||btn(14);
       const dRight=gp.axes[0]> 0.25||btn(15);
-      // Gaz : RT(7) / A(0) / D-pad haut(12) / axes[1] haut
-      const dAccel=gp.axes[7]>0.15||btn(7)||btn(0)||(gp.axes[1]<-0.25)||btn(12);
-      // Frein : LT(6) / B(1) / D-pad bas(13) / axes[1] bas
-      const dBrake=gp.axes[6]>0.15||btn(6)||btn(1)||(gp.axes[1]> 0.25)||btn(13);
-      // Item : X(2) / Y(3)
-      const dUse=btn(2)||btn(3);
+      // RT : axes[7] (Xbox360), axes[5] remappé (XboxOne/générique -1..1→0..1), btn(7)
+      const rtVal=Math.max(gp.axes[7]>0?gp.axes[7]:0, gp.axes[5]!=null?(gp.axes[5]+1)/2:0, gp.buttons[7]?gp.buttons[7].value:0);
+      // LT : axes[6] (Xbox360), axes[2] remappé (XboxOne/générique -1..1→0..1), btn(6)
+      const ltVal=Math.max(gp.axes[6]>0?gp.axes[6]:0, gp.axes[2]!=null?(gp.axes[2]+1)/2:0, gp.buttons[6]?gp.buttons[6].value:0);
+      // D-pad haut/bas — fonctionne pour NES (axes[1]) et Xbox (btn12/13)
+      const dPadUp  =(gp.axes[1]!=null&&gp.axes[1]<-0.45)||btn(12);
+      const dPadDown=(gp.axes[1]!=null&&gp.axes[1]> 0.45)||btn(13);
+      // Gaz : RT uniquement + D-pad haut (pas de bouton face pour éviter confusion NES/Xbox)
+      const dAccel=rtVal>0.15||dPadUp;
+      // Frein : LT uniquement + D-pad bas
+      const dBrake=ltVal>0.15||dPadDown;
+      // Item : n'importe quel bouton face (A/B/X/Y — peu importe disposition NES ou Xbox)
+      const dUse=btn(0)||btn(1)||btn(2)||btn(3)||btn(4)||btn(5);
       // Start(9) / Options(9) pour pause — détection front montant
       const dStart=btn(9)||btn(8);
       if(dStart&&!this._gpPrev.start){
@@ -1126,8 +1138,8 @@ const INPUT={
       // Axis brut pour steering analogique (deadzone 0.12)
       const rawAxis=Math.abs(gp.axes[0])>0.12 ? gp.axes[0] : 0;
       // Gaz analogique via RT (axes[7] ou buttons[7].value)
-      const accelAxis=Math.max((gp.axes[7]!=null?gp.axes[7]:0), (gp.buttons[7]&&gp.buttons[7].value!=null?gp.buttons[7].value:0), (gp.axes[6]<-0.25?0.6:0));
-      const brakeAxis=Math.max((gp.axes[6]!=null?gp.axes[6]:0), (gp.buttons[6]&&gp.buttons[6].value!=null?gp.buttons[6].value:0));
+      const accelAxis=Math.min(Math.max(rtVal, dPadUp?1:0), 1);
+      const brakeAxis=Math.min(Math.max(ltVal, dPadDown?1:0), 1);
       this.gamepad={left:dLeft,right:dRight,accel:dAccel,brake:dBrake,use:dUse,
                     steerAxis:rawAxis, accelAxis:Math.min(accelAxis,1), brakeAxis:Math.min(brakeAxis,1)};
     } else {
@@ -1585,7 +1597,7 @@ function useItem(k){
       game.projectiles.push({x:px,y:py,angle:k.angle+da,speed:info.speed,type:'KURKURE',ownerId:k.char.id,life:info.life,bounceCount:0});
     }
     AUDIO.beep(900,.05,.14,k.x,k.y);setTimeout(()=>AUDIO.beep(1100,.05,.12,k.x,k.y),40);setTimeout(()=>AUDIO.beep(1300,.08,.14,k.x,k.y),90);
-    if(isHuman(k))SFX.play('throw',.8);
+    if(isHuman(k)){SFX.play('throw',.8);if(Math.random()<0.65)SFX.playChar('throw',k.char.id,'throw_voice',.75,150);}
     return;
   }
   if(type==='DOSA'){
