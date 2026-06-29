@@ -2014,23 +2014,31 @@ function menuNav(action){
   }
 }
 
-// Lecture manette pour la navigation menus (directions répétées, A/B en front)
+// Lecture manette pour la navigation menus — supporte les deux manettes simultanément
+function _gpMenuState(gp){
+  if(!gp)return null;
+  const ax=gp.axes, B=i=>!!(gp.buttons[i]&&gp.buttons[i].pressed);
+  return {
+    left:ax[0]<-.5||B(14), right:ax[0]>.5||B(15),
+    up:ax[1]<-.5||B(12),   down:ax[1]>.5||B(13),
+    ok:B(1)||(gp.buttons[7]&&gp.buttons[7].value>.5)||B(9),
+    back:B(0)||(gp.buttons[6]&&gp.buttons[6].value>.5)
+  };
+}
 function pollMenuGamepad(t){
   const pads=navigator.getGamepads?navigator.getGamepads():null;
-  let gp=null; if(pads){for(let i=0;i<pads.length;i++){if(pads[i]&&pads[i].connected){gp=pads[i];break;}}}
-  if(!gp){_navPrev.ok=true;_navPrev.back=true;return;} // reconnexion : exiger un relâchement avant d'agir
-  const ax=gp.axes, B=i=>gp.buttons[i]&&gp.buttons[i].pressed;
-  const left =ax[0]<-.5||B(14), right=ax[0]>.5||B(15);
-  const up   =ax[1]<-.5||B(12), down =ax[1]>.5||B(13);
-  const okRaw  = B(1)||(gp.buttons[7]&&gp.buttons[7].value>.5)||B(9); // A physique NES=btn(1) / RT / Start
-  const backRaw= B(0)||(gp.buttons[6]&&gp.buttons[6].value>.5);       // B physique NES=btn(0) / LT
-  // Directions : répétition limitée (maintien = défilement)
+  let gp=null,gp2=null;
+  if(pads){for(var i=0;i<pads.length;i++){if(pads[i]&&pads[i].connected){if(!gp)gp=pads[i];else if(!gp2){gp2=pads[i];break;}}}}
+  if(!gp){_navPrev.ok=true;_navPrev.back=true;return;}
+  const s1=_gpMenuState(gp), s2=_gpMenuState(gp2)||{left:false,right:false,up:false,down:false,ok:false,back:false};
+  const left=s1.left||s2.left, right=s1.right||s2.right;
+  const up=s1.up||s2.up,       down=s1.down||s2.down;
+  const okRaw=s1.ok||s2.ok,    backRaw=s1.back||s2.back;
   if((left||right||up||down)&&t-game._padNav>170){
     if(up)menuNav('up'); else if(down)menuNav('down');
     else if(left)menuNav('left'); else if(right)menuNav('right');
     game._padNav=t;
   }
-  // A / B : déclenchement unique par appui
   if(okRaw&&!_navPrev.ok)menuNav('ok');
   if(backRaw&&!_navPrev.back)menuNav('back');
   _navPrev.ok=okRaw; _navPrev.back=backRaw;
