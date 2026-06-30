@@ -1,0 +1,33 @@
+<?xml version='1.0' encoding='utf-8'?>
+<widget id="com.vibecoding.punjabi" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+    <name>Punjabi Speed</name>
+    <description>Race karts on Punjabi circuits — up to 2 players, gamepad or touch controls</description>
+    <author email="dev@vibecoding.com" href="">Vibe Coding</author>
+    <content src="index.html" />
+
+    <!-- Plein écran forcé, paysage verrouillé -->
+    <preference name="Fullscreen" value="true" />
+    <preference name="Orientation" value="landscape" />
+
+    <!-- Empêche le scroll/rebond sur l'écran -->
+    <preference name="DisallowOverscroll" value="true" />
+
+    <!-- Accélération hardware pour Canvas 2D -->
+    <preference name="AndroidHardwareAccelerated" value="true" />
+
+    <!-- Autorise l'autoplay audio sans interaction (musique du menu au démarrage) -->
+    <preference name="MediaPlaybackRequiresUserAction" value="false" />
+
+    <!-- Empêche les popups de navigation -->
+    <preference name="AndroidLaunchMode" value="singleTop" />
+
+    <!-- Icône de l'app -->
+    <icon src="res/icon.png" />
+
+    <platform name="android">
+        <icon src="res/icon.png" />
+    </platform>
+
+    <allow-intent href="http://*/*" />
+    <allow-intent href="https://*/*" />
+</widget>

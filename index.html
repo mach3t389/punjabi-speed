@@ -213,13 +213,13 @@ body.sp-active #hud{display:none!important;}
 /* ---- Sous-titre tagline ---- */
 .title-tagline{margin-top:12px;margin-bottom:2px;font-size:clamp(15px,3vw,26px);color:#F4D03F;letter-spacing:5px;font-weight:900;text-shadow:2px 2px 0 #000;}
 /* ---- Boutons de titre ---- */
-.title-nav{margin-top:26px;display:flex;flex-direction:column;align-items:stretch;gap:12px;width:clamp(260px,44vw,360px);}
-.title-nav-secondary{display:flex;gap:10px;}
-.player-select-row{display:flex;gap:8px;}
+.title-nav{margin-top:clamp(14px,4vmin,26px);display:flex;flex-direction:column;align-items:stretch;gap:clamp(7px,1.8vmin,12px);width:min(92vw,clamp(220px,60vmin,360px));}
+.title-nav-secondary{display:flex;gap:clamp(6px,1.6vmin,10px);}
+.player-select-row{display:flex;gap:clamp(5px,1.4vmin,8px);}
 .player-btn{flex:1;padding:10px 6px;font-family:"Press Start 2P","Courier New",monospace;font-size:clamp(9px,1.6vw,13px);letter-spacing:1px;background:rgba(255,255,255,0.07);color:#aac8e8;border:2px solid rgba(100,160,220,0.3);border-radius:12px;cursor:pointer;transition:.12s;}
 .player-btn:hover{background:rgba(255,255,255,0.14);border-color:rgba(100,160,220,0.7);}
 .player-btn.active{background:rgba(244,208,63,0.18);color:#F4D03F;border-color:#F4D03F;text-shadow:0 0 8px rgba(244,208,63,.5);}
-.nav-btn{flex:1;padding:9px 10px;font-family:inherit;font-size:clamp(11px,1.9vw,14px);font-weight:bold;letter-spacing:1px;color:#fff;background:rgba(255,255,255,.10);border:2px solid rgba(255,255,255,.28);border-radius:24px;cursor:pointer;transition:.12s;text-align:center;}
+.nav-btn{flex:1 1 0;min-width:0;padding:clamp(7px,1.6vmin,9px) clamp(5px,1.3vmin,10px);font-family:inherit;font-size:clamp(9px,1.7vw,14px);font-weight:bold;letter-spacing:.5px;color:#fff;background:rgba(255,255,255,.10);border:2px solid rgba(255,255,255,.28);border-radius:24px;cursor:pointer;transition:.12s;text-align:center;}
 .nav-btn:hover{border-color:#F4D03F;background:rgba(244,208,63,.18);}
 .nav-play{flex:none;width:100%;padding:14px 10px;font-size:clamp(16px,3.2vw,24px);letter-spacing:3px;color:#062;background:#F4D03F;border:none;border-radius:32px;box-shadow:0 6px 0 #b9952a;transition:.12s;}
 .nav-play:hover{background:#ffe033;transform:translateY(-2px);box-shadow:0 8px 0 #b9952a;}
@@ -373,6 +373,13 @@ input[type=range].pk-slider::-moz-range-thumb{width:20px;height:20px;border-radi
         <div class="settings-row-inner" style="gap:8px">
           <button class="opt-btn sel" id="set-sfx-recorded" style="flex:1;height:34px;flex-direction:row;gap:6px;font-size:clamp(10px,1.6vw,13px)">🎤 <span data-i18n="sfx_voice">VOIX</span></button>
           <button class="opt-btn" id="set-sfx-synth" style="flex:1;height:34px;flex-direction:row;gap:6px;font-size:clamp(10px,1.6vw,13px)">🔊 <span data-i18n="sfx_synth">SYNTHÉ</span></button>
+        </div>
+      </div>
+      <div class="settings-row">
+        <label data-i18n="set_pedals">ACCÉL / FREIN (MANETTE)</label>
+        <div class="settings-row-inner" style="gap:8px">
+          <button class="opt-btn sel" id="set-ab-normal" style="flex:1;height:34px;flex-direction:row;gap:6px;font-size:clamp(10px,1.6vw,13px)"><span data-i18n="ab_normal">NORMAL</span></button>
+          <button class="opt-btn" id="set-ab-swap" style="flex:1;height:34px;flex-direction:row;gap:6px;font-size:clamp(10px,1.6vw,13px)"><span data-i18n="ab_swap">INVERSÉ</span></button>
         </div>
       </div>
     </div>
@@ -546,7 +553,7 @@ const STRINGS={
     wrong_way:'⚠ MAUVAIS SENS !', bridge:'PONT', use_btn:'USE',
     lap_label:'TOUR', ordinals:['1er','2e','3e','4e'],
     stats_btn:'📊 STATISTIQUES', stats_title:'📊 STATISTIQUES', back:'◀ RETOUR',
-    settings_btn:'⚙ PARAMÈTRES', settings_title:'⚙ PARAMÈTRES', set_music_vol:'VOLUME MUSIQUE', set_sfx_vol:'VOLUME EFFETS', set_sfx_mode:'TYPE DE SONS', sfx_voice:'VOIX', sfx_synth:'SYNTHÉ',
+    settings_btn:'⚙ PARAMÈTRES', settings_title:'⚙ PARAMÈTRES', set_music_vol:'VOLUME MUSIQUE', set_sfx_vol:'VOLUME EFFETS', set_sfx_mode:'TYPE DE SONS', sfx_voice:'VOIX', sfx_synth:'SYNTHÉ', set_pedals:'ACCÉL / FREIN (MANETTE)', ab_normal:'NORMAL', ab_swap:'INVERSÉ',
     ctrl_title:'CONTRÔLES', ctrl_keyboard:'⌨ CLAVIER', ctrl_gamepad:'🎮 MANETTE',
     ctrl_steer:'Diriger', ctrl_gas:'Accélérer', ctrl_brake:'Freiner', ctrl_item:'Utiliser item', ctrl_item_back:'Lancer derrière', ctrl_confirm:'Valider menu', ctrl_back:'Retour',
     stats_reset:'Réinitialiser les statistiques',
@@ -580,7 +587,7 @@ const STRINGS={
     wrong_way:'⚠ WRONG WAY!', bridge:'BRIDGE', use_btn:'USE',
     lap_label:'LAP', ordinals:['1st','2nd','3rd','4th'],
     stats_btn:'📊 STATS', stats_title:'📊 STATISTICS', back:'◀ BACK',
-    settings_btn:'⚙ SETTINGS', settings_title:'⚙ SETTINGS', set_music_vol:'MUSIC VOLUME', set_sfx_vol:'SFX VOLUME', set_sfx_mode:'SOUND TYPE', sfx_voice:'VOICE', sfx_synth:'SYNTH',
+    settings_btn:'⚙ SETTINGS', settings_title:'⚙ SETTINGS', set_music_vol:'MUSIC VOLUME', set_sfx_vol:'SFX VOLUME', set_sfx_mode:'SOUND TYPE', sfx_voice:'VOICE', sfx_synth:'SYNTH', set_pedals:'GAS / BRAKE (GAMEPAD)', ab_normal:'NORMAL', ab_swap:'SWAPPED',
     ctrl_title:'CONTROLS', ctrl_keyboard:'⌨ KEYBOARD', ctrl_gamepad:'🎮 GAMEPAD',
     ctrl_steer:'Steer', ctrl_gas:'Accelerate', ctrl_brake:'Brake', ctrl_item:'Use item', ctrl_item_back:'Throw backward', ctrl_confirm:'Confirm menu', ctrl_back:'Back',
     stats_reset:'Reset statistics',
@@ -614,7 +621,7 @@ const STRINGS={
     wrong_way:'⚠ ਗਲਤ ਦਿਸ਼ਾ!', bridge:'ਪੁਲ', use_btn:'ਵਰਤੋ',
     lap_label:'ਲੈਪ', ordinals:['1st','2nd','3rd','4th'],
     stats_btn:'📊 ਅੰਕੜੇ', stats_title:'📊 ਅੰਕੜੇ', back:'◀ ਵਾਪਸ',
-    settings_btn:'⚙ ਸੈਟਿੰਗਾਂ', settings_title:'⚙ ਸੈਟਿੰਗਾਂ', set_music_vol:'ਸੰਗੀਤ ਆਵਾਜ਼', set_sfx_vol:'SFX ਆਵਾਜ਼', set_sfx_mode:'ਆਵਾਜ਼ ਦੀ ਕਿਸਮ', sfx_voice:'ਆਵਾਜ਼', sfx_synth:'ਸਿੰਥ',
+    settings_btn:'⚙ ਸੈਟਿੰਗਾਂ', settings_title:'⚙ ਸੈਟਿੰਗਾਂ', set_music_vol:'ਸੰਗੀਤ ਆਵਾਜ਼', set_sfx_vol:'SFX ਆਵਾਜ਼', set_sfx_mode:'ਆਵਾਜ਼ ਦੀ ਕਿਸਮ', sfx_voice:'ਆਵਾਜ਼', sfx_synth:'ਸਿੰਥ', set_pedals:'ਗੈਸ / ਬ੍ਰੇਕ (ਮੈਨੇਟ)', ab_normal:'ਆਮ', ab_swap:'ਉਲਟਾ',
     ctrl_title:'ਕੰਟਰੋਲ', ctrl_keyboard:'⌨ ਕੀਬੋਰਡ', ctrl_gamepad:'🎮 ਗੇਮਪੈਡ',
     ctrl_steer:'ਦਿਸ਼ਾ', ctrl_gas:'ਤੇਜ਼ ਕਰੋ', ctrl_brake:'ਬ੍ਰੇਕ', ctrl_item:'ਆਈਟਮ ਵਰਤੋ', ctrl_item_back:'ਪਿੱਛੇ ਸੁੱਟੋ', ctrl_confirm:'ਪੁਸ਼ਟੀ', ctrl_back:'ਵਾਪਸ',
     stats_reset:'ਅੰਕੜਿਆਂ ਨੂੰ ਰੀਸੈਟ ਕਰੋ',
@@ -648,7 +655,7 @@ const STRINGS={
     wrong_way:'⚠ गलत दिशा!', bridge:'पुल', use_btn:'उपयोग करो',
     lap_label:'लैप', ordinals:['1st','2nd','3rd','4th'],
     stats_btn:'📊 आंकड़े', stats_title:'📊 आंकड़े', back:'◀ पीछे',
-    settings_btn:'⚙ सेटिंग्स', settings_title:'⚙ सेटिंग्स', set_music_vol:'संगीत वॉल्यूम', set_sfx_vol:'SFX वॉल्यूम', set_sfx_mode:'ध्वनि प्रकार', sfx_voice:'आवाज़', sfx_synth:'सिंथ',
+    settings_btn:'⚙ सेटिंग्स', settings_title:'⚙ सेटिंग्स', set_music_vol:'संगीत वॉल्यूम', set_sfx_vol:'SFX वॉल्यूम', set_sfx_mode:'ध्वनि प्रकार', sfx_voice:'आवाज़', sfx_synth:'सिंथ', set_pedals:'गैस / ब्रेक (गेमपैड)', ab_normal:'सामान्य', ab_swap:'उलटा',
     ctrl_title:'नियंत्रण', ctrl_keyboard:'⌨ कीबोर्ड', ctrl_gamepad:'🎮 गेमपैड',
     ctrl_steer:'दिशा', ctrl_gas:'तेज़ करो', ctrl_brake:'ब्रेक', ctrl_item:'आइटम उपयोग', ctrl_confirm:'पुष्टि', ctrl_back:'वापस',
     stats_reset:'आंकड़ों को रीसेट करो',
@@ -768,17 +775,46 @@ const ITEM_RESPAWN=600;
 // Icônes : emoji rendu petit puis agrandi nearest-neighbor = "pixelisé"
 const DIFF_ICONS={LEAF:'🫑',BOLT:'🌶️',SKULL:'🔥'};
 const _emojiCache={};
+// Emoji trop récents pour Chrome 79 / vieux Android (rendraient une case vide) →
+// dessinés à la main en pixel art : 🫓 DOSA, 🧅 oignon, 🩴 chappal, 🫑 poivron (difficulté facile).
+const _ART_EMOJI={'🫓':'dosa','🧅':'onion','🩴':'sandal','🫑':'pepper'};
+function _drawPixelArt(c,kind,S){
+  function R(x,y,w,h,col){c.fillStyle=col;c.fillRect(Math.round(x*S),Math.round(y*S),Math.max(1,Math.round(w*S)),Math.max(1,Math.round(h*S)));}
+  if(kind==='dosa'){           // galette dorée ovale + taches grillées
+    var L='#e8b73a',D='#9c7415',B='#6e500c';
+    R(0.22,0.36,0.56,0.10,L); R(0.12,0.42,0.76,0.22,L); R(0.06,0.50,0.88,0.12,L);
+    R(0.12,0.60,0.76,0.10,D);
+    R(0.32,0.46,0.10,0.10,B); R(0.60,0.43,0.08,0.08,B); R(0.46,0.53,0.07,0.07,B);
+  } else if(kind==='onion'){   // bulbe violet + stries + pousse verte
+    var oD='#9c5bb0',oL='#caa0e0',g='#3f9a34';
+    R(0.28,0.34,0.44,0.50,oD); R(0.33,0.38,0.34,0.44,oL);
+    R(0.46,0.36,0.05,0.48,oD); R(0.38,0.42,0.04,0.36,oD); R(0.58,0.42,0.04,0.36,oD);
+    R(0.45,0.13,0.07,0.20,g); R(0.38,0.18,0.07,0.10,g); R(0.55,0.18,0.07,0.10,g);
+  } else if(kind==='sandal'){  // semelle brune ovale + lanière en V
+    var sL='#d6920f',sD='#5d3a00';
+    R(0.30,0.14,0.22,0.10,sL); R(0.24,0.20,0.36,0.62,sL); R(0.18,0.32,0.48,0.40,sL);
+    R(0.41,0.26,0.05,0.34,sD); R(0.30,0.30,0.16,0.05,sD); R(0.46,0.30,0.16,0.05,sD);
+  } else if(kind==='pepper'){  // poivron vert + tige
+    var pG='#4ca832',pD='#2f7320',st='#3a7a25';
+    R(0.30,0.32,0.40,0.48,pG); R(0.34,0.36,0.34,0.40,pG); R(0.30,0.40,0.10,0.34,pD);
+    R(0.46,0.14,0.06,0.16,st); R(0.40,0.20,0.20,0.08,st);
+  }
+}
 function _buildPixelEmoji(emoji,srcPx,dstPx){
   const key=emoji+'_'+srcPx+'_'+dstPx;
   if(_emojiCache[key])return _emojiCache[key];
-  // 1. Dessiner l'emoji à petite taille (srcPx)
+  const out=document.createElement('canvas');out.width=dstPx;out.height=dstPx;
+  const oc=out.getContext('2d');oc.imageSmoothingEnabled=false;
+  // Emoji trop récent → pixel art dessiné (sinon Chrome 79 dessine du vide)
+  if(_ART_EMOJI[emoji]){
+    _drawPixelArt(oc,_ART_EMOJI[emoji],dstPx);
+    return(_emojiCache[key]=out);
+  }
+  // 1. Dessiner l'emoji à petite taille (srcPx) puis 2. agrandir sans antialiasing
   const tmp=document.createElement('canvas');tmp.width=srcPx;tmp.height=srcPx;
   const tc=tmp.getContext('2d');
   tc.font=Math.round(srcPx*.9)+'px serif';tc.textBaseline='middle';tc.textAlign='center';
   tc.fillText(emoji,srcPx/2,srcPx/2+srcPx*.04);
-  // 2. Agrandir sans antialiasing → pixels bien carrés
-  const out=document.createElement('canvas');out.width=dstPx;out.height=dstPx;
-  const oc=out.getContext('2d');oc.imageSmoothingEnabled=false;
   oc.drawImage(tmp,0,0,dstPx,dstPx);
   return(_emojiCache[key]=out);
 }
@@ -1134,15 +1170,20 @@ const INPUT={
     const btn=i=>(g.buttons[i]&&(g.buttons[i].pressed||g.buttons[i].value>0.15));
     const dLeft =g.axes[0]<-0.25||btn(14);
     const dRight=g.axes[0]> 0.25||btn(15);
-    const rtVal=Math.max(g.axes[7]>0?g.axes[7]:0,g.axes[5]!=null?(g.axes[5]+1)/2:0,g.buttons[7]?g.buttons[7].value:0);
-    const ltVal=Math.max(g.axes[6]>0?g.axes[6]:0,g.axes[2]!=null?(g.axes[2]+1)/2:0,g.buttons[6]?g.buttons[6].value:0);
+    // Gâchettes : uniquement les axes au repos à 0 (g.axes[N]>0) et les boutons LT/RT.
+    // On NE lit PLUS les axes via (axe+1)/2 : un stick au repos (0) y serait lu comme demi-frein
+    // → le kart reculait tout seul (bug « ça ne fait que reculer »).
+    const rtVal=Math.max(g.axes[7]>0?g.axes[7]:0,g.buttons[7]?g.buttons[7].value:0);
+    const ltVal=Math.max(g.axes[6]>0?g.axes[6]:0,g.buttons[6]?g.buttons[6].value:0);
     const dPadDown=(g.axes[1]!=null&&g.axes[1]>0.45)||btn(13);
-    const dAccel=rtVal>0.15||btn(1);
-    const dBrake=ltVal>0.15||btn(0);
+    // swapAB : inverse accélérer/freiner pour les manettes dont A/B sont aux index opposés (réglage)
+    const accelBtn=swapAB?0:1, brakeBtn=swapAB?1:0;
+    const dAccel=rtVal>0.15||btn(accelBtn);
+    const dBrake=ltVal>0.15||btn(brakeBtn);
     const dUse=btn(3);
     const rawAxis=Math.abs(g.axes[0])>0.12?g.axes[0]:(dLeft?-1:dRight?1:0);
-    const accelAxis=Math.min(Math.max(rtVal,btn(1)?1:0),1);
-    const brakeAxis=Math.min(Math.max(ltVal,btn(0)?1:0),1);
+    const accelAxis=Math.min(Math.max(rtVal,btn(accelBtn)?1:0),1);
+    const brakeAxis=Math.min(Math.max(ltVal,btn(brakeBtn)?1:0),1);
     return {left:dLeft,right:dRight,accel:dAccel,brake:dBrake,use:dUse,dPadDown:dPadDown,
             steerAxis:rawAxis,accelAxis:Math.min(accelAxis,1),brakeAxis:Math.min(brakeAxis,1),
             start:btn(9)||btn(8)};
@@ -1261,12 +1302,13 @@ window.addEventListener('keydown',e=>{
     else if(e.code==='Enter'||e.code==='Space')menuNav('ok');
     else if(e.code==='Backspace')menuNav('back');
   }
-  // Utiliser l'item en course (une seule fois par appui)
+  // Utiliser l'item en course (une seule fois par appui). Shift = J1, Ctrl = J2 (split-screen
+  // uniquement). En solo, Ctrl ne déclenche PLUS J1 — évitait un double lancer/animation.
   if((e.code==='ShiftLeft'||e.code==='ShiftRight')&&game.state===STATE.RACING&&!e.repeat){
     useItem(game.player,!!(INPUT.keyboard['ArrowDown']||INPUT.keyboard['KeyS']));
   }
-  if((e.code==='ControlLeft'||e.code==='ControlRight')&&game.state===STATE.RACING&&!e.repeat){
-    if(game.splitScreen&&game.p2)useItem(game.p2,!!(INPUT.keyboard['KeyS']));else useItem(game.player,!!(INPUT.keyboard['ArrowDown']||INPUT.keyboard['KeyS']));
+  if((e.code==='ControlLeft'||e.code==='ControlRight')&&game.state===STATE.RACING&&!e.repeat&&game.splitScreen&&game.p2){
+    useItem(game.p2,!!(INPUT.keyboard['KeyS']));
   }
   if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();
 });
@@ -2069,8 +2111,8 @@ function _gpMenuState(gp){
   return {
     left:ax[0]<-.5||B(14), right:ax[0]>.5||B(15),
     up:ax[1]<-.5||B(12),   down:ax[1]>.5||B(13),
-    ok:B(1)||(gp.buttons[7]&&gp.buttons[7].value>.5)||B(9),
-    back:B(0)||(gp.buttons[6]&&gp.buttons[6].value>.5)
+    ok:B(swapAB?0:1)||(gp.buttons[7]&&gp.buttons[7].value>.5)||B(9),
+    back:B(swapAB?1:0)||(gp.buttons[6]&&gp.buttons[6].value>.5)
   };
 }
 function pollMenuGamepad(t){
@@ -2292,6 +2334,9 @@ function goToSettings(){game.state=STATE.SETTINGS;showScreen('screen-settings');
 
 let sfxVolume=0.80; // volume effets sonores (0–1)
 let useSynthSFX=false; // true = sons synthétisés, false = voix enregistrées
+let swapAB=false; // inverse accélérer/freiner sur la manette (réglage persistant)
+try{swapAB=localStorage.getItem('swapAB')==='1';}catch(e){}
+function _saveSwapAB(){try{localStorage.setItem('swapAB',swapAB?'1':'0');}catch(e){}}
 function initSettings(){
   const mvSlider=document.getElementById('set-music-vol');
   const mvVal=document.getElementById('set-music-vol-val');
@@ -2312,6 +2357,12 @@ function initSettings(){
   function _sfxModeUpdate(){btnRec.classList.toggle('sel',!useSynthSFX);btnSynth.classList.toggle('sel',useSynthSFX);}
   btnRec.addEventListener('click',()=>{useSynthSFX=false;_sfxModeUpdate();});
   btnSynth.addEventListener('click',()=>{useSynthSFX=true;_sfxModeUpdate();});
+  const btnABn=document.getElementById('set-ab-normal');
+  const btnABs=document.getElementById('set-ab-swap');
+  function _abUpdate(){btnABn.classList.toggle('sel',!swapAB);btnABs.classList.toggle('sel',swapAB);}
+  btnABn.addEventListener('click',()=>{swapAB=false;_saveSwapAB();_abUpdate();});
+  btnABs.addEventListener('click',()=>{swapAB=true;_saveSwapAB();_abUpdate();});
+  _abUpdate();
   document.getElementById('settings-back').addEventListener('click',()=>{game.state=STATE.TITLE;menuMusicPlay();showScreen('screen-title');});
 }
 
@@ -2625,11 +2676,19 @@ function init(){
   loadStats();
   updateTexts();
   showScreen('screen-title');game.state=STATE.TITLE;
-  // Démarrer la musique dès la première interaction (contournement politique autoplay)
-  document.addEventListener('pointerdown',function _startMusic(){
-    menuMusicPlay();
-    document.removeEventListener('pointerdown',_startMusic);
-  },{once:true});
+  // Musique : tenter l'autoplay immédiatement (l'APK l'autorise via la préférence
+  // MediaPlaybackRequiresUserAction=false). Si la politique du navigateur le bloque,
+  // on réessaie au 1er geste tactile OU à la 1re touche (clavier/manette mappée).
+  function _startMusic(){menuMusicPlay();document.removeEventListener('pointerdown',_startMusic);document.removeEventListener('keydown',_startMusic);}
+  (function _tryAutoMusic(){
+    var m=_mm();if(!m)return;
+    var p=m.play();
+    if(p&&typeof p.then==='function'){
+      p.then(function(){m._playing=true;m.volume=0.55;document.removeEventListener('pointerdown',_startMusic);document.removeEventListener('keydown',_startMusic);}).catch(function(){});
+    }
+  })();
+  document.addEventListener('pointerdown',_startMusic);
+  document.addEventListener('keydown',_startMusic);
   requestAnimationFrame(loop);
 }
 init();
